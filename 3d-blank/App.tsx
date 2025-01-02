@@ -46,6 +46,7 @@ export default function App() {
 
   //seat code
   const seatCodes = "ABCDEF";
+  const seatNumbers = {};
   const [OrbitControls, events] = useControls();
   return (
     <View style={styles.container}>
@@ -68,24 +69,30 @@ export default function App() {
           <Suspense fallback={<Text>Loading model...</Text>}>
             {/* Cinema Seats */}
             {allPositions.map((pos, index) => {
-              const [, rowIndex] = pos;
+              const [colIndex, rowIndex] = pos;
               const seatCode = seatCodes[rowIndex / 0.5];
-              // if (seatNumber % 12 === 0) {
-              //   seatNumber = 1;
-              // }
-              // seatNumber++;
-              const seatNumber =
-                (index %
-                  sections.reduce((sum, section) => sum + section.columns, 0)) +
-                1;
+              //use object to store current seat number, increment when changing seat in same row
+              if (seatNumbers[seatCode] === undefined) {
+                seatNumbers[seatCode] = 1;
+              } else {
+                seatNumbers[seatCode]++;
+              }
+              // console.log(seatNumbers);
 
               return (
                 <group key={index} position={pos}>
                   <Model />
                   {/* seat number */}
-                  <mesh position={[-0.33, 0.8, 0]} scale={0.004}>
+                  <mesh
+                    position={[
+                      seatNumbers[seatCode] < 10 ? -0.33 : -0.38,
+                      0.8,
+                      0,
+                    ]}
+                    scale={0.004}
+                  >
                     <textGeometry
-                      args={[`${seatCode}${seatNumber}`, { font }]}
+                      args={[`${seatCode}${seatNumbers[seatCode]}`, { font }]}
                     />
                     <meshLambertMaterial attach="material" color={"gold"} />
                   </mesh>
@@ -107,7 +114,6 @@ export default function App() {
             </mesh>
 
             {/* Text Spotlight */}
-            <pointLight color="blue" intensity={300} position={[10, 4.5, 5]} />
           </Suspense>
         </Canvas>
       </View>
