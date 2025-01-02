@@ -1,17 +1,29 @@
 import React, { Suspense } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, extend, Object3DNode } from "@react-three/fiber";
 import useControls from "r3f-native-orbitcontrols";
 import Model from "./components/Model";
+import { PlaneGeometry, DoubleSide } from "three";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
+import TextModel from "./components/TextModel";
+import myFont from "./assets/fonts/Lobster_Regular.json";
 
+extend({ PlaneGeometry, TextGeometry });
+
+declare module "@react-three/fiber" {
+  interface ThreeElements {
+    textGeometry: Object3DNode<TextGeometry, typeof TextGeometry>;
+  }
+}
 const createRowPositions = (rows: number, columns: number, xOffset: number) => {
   const positions: [number, number, number][] = [];
   for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
     for (let colIndex = 0; colIndex < columns; colIndex++) {
       positions.push([
-        colIndex * 1.5 + xOffset, // X-axis offset
+        colIndex * 1.5 + xOffset - 2, // X-axis offset
         rowIndex * 0.5, // Y-axis elevation
-        rowIndex * -2, // Z-axis row spacing
+        rowIndex * -2 - 2.3, // Z-axis row spacing
       ]);
     }
   }
@@ -19,18 +31,22 @@ const createRowPositions = (rows: number, columns: number, xOffset: number) => {
 };
 
 export default function App() {
+  // const font = useLoader(FontLoader, require("./assets/fonts/lobster.json"));
+  const font = new FontLoader().parse(myFont);
   const rows = 5;
   const sections = [
-    { columns: 5, xOffset: 0 },
-    { columns: 8, xOffset: 10 },
-    { columns: 2, xOffset: 24 },
+    { columns: 2, xOffset: 0 },
+    { columns: 8, xOffset: 5 },
+    { columns: 2, xOffset: 19 },
   ];
 
   const allPositions = sections.flatMap((section) =>
     createRowPositions(rows, section.columns, section.xOffset)
   );
-  const [OrbitControls, events] = useControls();
 
+  //seat code
+  const seatCodes = "ABCDEF";
+  const [OrbitControls, events] = useControls();
   return (
     <View style={styles.container}>
       <Text style={styles.text}>3D Cinema Viewer</Text>
@@ -44,19 +60,54 @@ export default function App() {
           }}
         >
           <OrbitControls />
-          <ambientLight intensity={0.5} />
-          <directionalLight color="red" intensity={3} position={[10, 10, 5]} />
 
-          {/* <spotLight
-            position={[10, 20, 10]}
-            angle={0.3}
-            intensity={1}
-            color={"red"}
-          /> */}
+          <ambientLight intensity={0.5} />
+          <directionalLight color="red" intensity={4} position={[0, 10, 5]} />
+          <directionalLight color="white" intensity={1} position={[2, 0, -4]} />
+
           <Suspense fallback={<Text>Loading model...</Text>}>
-            {allPositions.map((pos, index) => (
-              <Model key={index} position={pos} />
-            ))}
+            {/* Cinema Seats */}
+            {allPositions.map((pos, index) => {
+              const [, rowIndex] = pos;
+              const seatCode = seatCodes[rowIndex / 0.5];
+              // if (seatNumber % 12 === 0) {
+              //   seatNumber = 1;
+              // }
+              // seatNumber++;
+              const seatNumber =
+                (index %
+                  sections.reduce((sum, section) => sum + section.columns, 0)) +
+                1;
+
+              return (
+                <group key={index} position={pos}>
+                  <Model />
+                  {/* seat number */}
+                  <mesh position={[-0.33, 0.8, 0]} scale={0.004}>
+                    <textGeometry
+                      args={[`${seatCode}${seatNumber}`, { font }]}
+                    />
+                    <meshLambertMaterial attach="material" color={"gold"} />
+                  </mesh>
+                </group>
+              );
+            })}
+
+            {/* Cinema Screen */}
+            <mesh position={[10, 5, 7]}>
+              <planeGeometry args={[25, 10]} />
+              <meshStandardMaterial color="white" side={DoubleSide} />
+            </mesh>
+            <TextModel position={[19, 4.5, 7]} />
+
+            {/* Floor */}
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[10, 0, -2]}>
+              <planeGeometry args={[35, 20]} />
+              <meshBasicMaterial color="#2F4F4F" />
+            </mesh>
+
+            {/* Text Spotlight */}
+            <pointLight color="blue" intensity={300} position={[10, 4.5, 5]} />
           </Suspense>
         </Canvas>
       </View>

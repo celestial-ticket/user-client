@@ -9,7 +9,8 @@ config.resolver.assetExts.push(
   "glb",
   "gltf",
   "png",
-  "jpg"
+  "jpg",
+  "json" // Add 'json' to the list of supported asset extensions
 );
 
 module.exports = config;
