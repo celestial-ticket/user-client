@@ -7,7 +7,7 @@ import { PlaneGeometry, DoubleSide } from "three";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 import TextModel from "./components/TextModel";
-import myFont from "./assets/fonts/Lobster_Regular.json";
+import myFont from "./assets/fonts/Roboto Condensed_Regular.json";
 
 extend({ PlaneGeometry, TextGeometry });
 
@@ -85,16 +85,17 @@ export default function App() {
                   {/* seat number */}
                   <mesh
                     position={[
-                      seatNumbers[seatCode] < 10 ? -0.33 : -0.38,
-                      0.8,
-                      0,
+                      seatNumbers[seatCode] < 10 ? -0.33 : -0.4,
+                      0.9,
+                      0.4,
                     ]}
                     scale={0.004}
+                    rotation={[-Math.PI / 2, 0, 0]}
                   >
                     <textGeometry
                       args={[`${seatCode}${seatNumbers[seatCode]}`, { font }]}
                     />
-                    <meshLambertMaterial attach="material" color={"gold"} />
+                    <meshLambertMaterial attach="material" color={"white"} />
                   </mesh>
                 </group>
               );
@@ -110,7 +111,7 @@ export default function App() {
             {/* Floor */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[10, 0, -2]}>
               <planeGeometry args={[35, 20]} />
-              <meshBasicMaterial color="#2F4F4F" />
+              <meshBasicMaterial color="#3d3d3d" />
             </mesh>
 
             {/* Text Spotlight */}
