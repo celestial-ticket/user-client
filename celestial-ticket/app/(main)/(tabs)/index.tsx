@@ -1,5 +1,6 @@
 import {
     Dimensions,
+    FlatList,
     Image,
     StyleSheet,
     Text,
@@ -16,7 +17,6 @@ import * as Location from "expo-location";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 // ! Carousel
-import PagerView from "react-native-pager-view";
 import Carousel from "react-native-reanimated-carousel";
 
 export default function Page() {
@@ -26,6 +26,7 @@ export default function Page() {
     );
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [city, setCity] = useState("");
+
 
     useEffect(() => {
         (async () => {
@@ -38,7 +39,7 @@ export default function Page() {
             let location = await Location.getCurrentPositionAsync({});
             setLocation(location);
 
-            // Reverse geocode to get city name
+            // get city name
             const { latitude, longitude } = location.coords;
             let address = await Location.reverseGeocodeAsync({
                 latitude,
@@ -87,6 +88,63 @@ export default function Page() {
         },
     ];
 
+    // ! Card now showing
+    
+    const itemWidth = width * 0.5; // Width of each item
+    const data = [
+        {
+            title: "Devils Stay",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "Wicked",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "The Great Escape",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "Mystery Night",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "Adventure Time",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "Horror House",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "Comedy Club",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "Romantic Getaway",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "Sci-Fi World",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+        {
+            title: "Fantasy Land",
+            image: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        },
+    ];
+    const renderItem = ({ item }) => (
+        <View
+            className="bg-white rounded-lg shadow-md ml-3 mr-3"
+            style={{ width: itemWidth }}
+        >
+            <Image
+                source={{ uri: item.image }}
+                className="h-96 w-full rounded-lg"
+            />
+        </View>
+    );
+
     return (
         <SafeAreaView className="bg-white h-full">
             {/* SEARCH BAR */}
@@ -130,13 +188,13 @@ export default function Page() {
                     }
                     renderItem={({ item }) => (
                         <View
-                            // style={{
-                            //     flex: 1,
-                            //     justifyContent: "center",
-                            //     alignItems: "center",
-                            //     borderRadius: 10,
-                            //     overflow: "hidden",
-                            // }}
+                        // style={{
+                        //     flex: 1,
+                        //     justifyContent: "center",
+                        //     alignItems: "center",
+                        //     borderRadius: 10,
+                        //     overflow: "hidden",
+                        // }}
                         >
                             <Image
                                 source={{ uri: item.image }}
@@ -156,7 +214,20 @@ export default function Page() {
             {/* CARD NOW SHOWING */}
 
             <View>
-                <Text>Now Showing</Text>
+                <Text className="m-5 font-bold text-xl">Now Showing</Text>
+                <FlatList
+                    data={data}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.title}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
+                    decelerationRate="fast" // Fast deceleration for smoother snapping
+                    snapToAlignment="center" // Snap to center
+                    contentContainerStyle={{
+                        paddingHorizontal: (width - itemWidth) / 2, // Center the first item
+                    }}
+                />
             </View>
 
             {/* ALL MOVIE CARD */}
