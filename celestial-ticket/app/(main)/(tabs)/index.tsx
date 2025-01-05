@@ -18,6 +18,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 // ! Carousel
 import Carousel from "react-native-reanimated-carousel";
+import { Link } from "expo-router";
 
 export default function Page() {
     // ! Location
@@ -156,7 +157,7 @@ export default function Page() {
                     </View>
                     <TextInput placeholder="Search" className="w-5/6" />
                 </View>
-                <FontAwesome6 name="user-circle" size={28} color="black" />
+                <Link href="/profile"><FontAwesome6 name="user-circle" size={28} color="black" /></Link>
             </View>
             {/* ----------------- */}
 
