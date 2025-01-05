@@ -1,8 +1,11 @@
-import { Stack } from 'expo-router/stack';
-import '../../global.css';
+import { Stack } from "expo-router/stack";
+import "../../global.css";
 
 export default function Layout() {
-  return (
-    <Stack screenOptions={{ headerShown: false }} />
-  );
+    return (
+        <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="profile/index" options={{ headerShown: false }} />
+        </Stack>
+    );
 }
