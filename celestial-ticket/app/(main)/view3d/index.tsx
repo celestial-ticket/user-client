@@ -1,21 +1,16 @@
-import React, { Suspense } from "react";
-import { StyleSheet, View, Text } from "react-native";
-import { Canvas, extend, Object3DNode } from "@react-three/fiber";
+import { useLocalSearchParams } from "expo-router";
+import { View, StyleSheet, Text } from "react-native";
+import { Suspense } from "react";
+import { Canvas, extend } from "@react-three/fiber";
 import useControls from "r3f-native-orbitcontrols";
-import Model from "./components/Model";
 import { PlaneGeometry, DoubleSide } from "three";
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
-import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
-import TextModel from "./components/TextModel";
-import myFont from "./assets/fonts/Roboto Condensed_Regular.json";
+import Model from "../../components/Model";
+import TextModel from "../../components/TextModel";
+import CustomTextModel from "../../components/CustomTextModel";
+import AngelModel from "../../components/AngelModel";
 
-extend({ PlaneGeometry, TextGeometry });
+extend({ PlaneGeometry });
 
-declare module "@react-three/fiber" {
-  interface ThreeElements {
-    textGeometry: Object3DNode<TextGeometry, typeof TextGeometry>;
-  }
-}
 const createRowPositions = (rows: number, columns: number, xOffset: number) => {
   const positions: [number, number, number][] = [];
   for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
@@ -30,24 +25,34 @@ const createRowPositions = (rows: number, columns: number, xOffset: number) => {
   return positions;
 };
 
-export default function App() {
-  // const font = useLoader(FontLoader, require("./assets/fonts/lobster.json"));
-  const font = new FontLoader().parse(myFont);
+export default function View3D() {
+  const params = useLocalSearchParams();
+  const { seats } = params;
+
+  const parsedSeats = Array.isArray(seats)
+    ? JSON.parse(seats[0])
+    : JSON.parse(seats);
+  console.log("🚀 ~ View3D ~ parsedSeats:", parsedSeats);
+
+  const seatStatus = parsedSeats.reduce((acc: {}, [seat, status]) => {
+    acc[seat] = status;
+    return acc;
+  }, {});
+
+  const seatCodes = "ABCDEF";
+  const seatNumbers = {};
+
   const rows = 5;
   const sections = [
     { columns: 2, xOffset: 0 },
     { columns: 8, xOffset: 5 },
     { columns: 2, xOffset: 19 },
   ];
+  const [OrbitControls, events] = useControls();
 
   const allPositions = sections.flatMap((section) =>
     createRowPositions(rows, section.columns, section.xOffset)
   );
-
-  //seat code
-  const seatCodes = "ABCDEF";
-  const seatNumbers = {};
-  const [OrbitControls, events] = useControls();
   return (
     <View style={styles.container}>
       <Text style={styles.text}>3D Cinema Viewer</Text>
@@ -59,44 +64,66 @@ export default function App() {
             near: 0.1, // Near clipping plane
             far: 50, // Far clipping plane
           }}
+          shadows
         >
           <OrbitControls />
+          <ambientLight intensity={0.3} />
+          <directionalLight color="red" intensity={2} position={[0, 10, 5]} />
+          <directionalLight
+            color="white"
+            intensity={0.8}
+            position={[2, 0, -4]}
+          />
 
-          <ambientLight intensity={0.5} />
-          <directionalLight color="red" intensity={4} position={[0, 10, 5]} />
-          <directionalLight color="white" intensity={1} position={[2, 0, -4]} />
-
-          <Suspense fallback={<Text>Loading model...</Text>}>
+          <Suspense
+            fallback={
+              <CustomTextModel
+                meshProps={{
+                  position: [0, 0, 0],
+                  scale: [0.1, 0.1, 0.1],
+                  rotation: [0, 0, 0],
+                }}
+                text="Loading..."
+                color="white"
+              />
+            }
+          >
             {/* Cinema Seats */}
             {allPositions.map((pos, index) => {
               const [colIndex, rowIndex] = pos;
               const seatCode = seatCodes[rowIndex / 0.5];
-              //use object to store current seat number, increment when changing seat in same row
               if (seatNumbers[seatCode] === undefined) {
                 seatNumbers[seatCode] = 1;
               } else {
                 seatNumbers[seatCode]++;
               }
-              // console.log(seatNumbers);
+              const seatPosition = `${seatCode}${seatNumbers[seatCode]}`;
+              const status = seatStatus[seatPosition] || "Available";
 
               return (
                 <group key={index} position={pos}>
+                  {/* Cinema Seat */}
                   <Model />
+                  {/* Angel Model */}
+                  {status === "Booked" && (
+                    <AngelModel position={[-0.02, 0.8, 0.2]} />
+                  )}
                   {/* seat number */}
-                  <mesh
-                    position={[
-                      seatNumbers[seatCode] < 10 ? -0.33 : -0.4,
-                      0.9,
-                      0.4,
-                    ]}
-                    scale={0.004}
-                    rotation={[-Math.PI / 2, 0, 0]}
-                  >
-                    <textGeometry
-                      args={[`${seatCode}${seatNumbers[seatCode]}`, { font }]}
+                  {status !== "Booked" && (
+                    <CustomTextModel
+                      meshProps={{
+                        position: [
+                          seatNumbers[seatCode] < 10 ? -0.33 : -0.4,
+                          0.9,
+                          0.4,
+                        ],
+                        scale: [0.004, 0.004, 0.004],
+                        rotation: [-Math.PI / 2, 0, 0],
+                      }}
+                      text={seatPosition}
+                      color={"white"}
                     />
-                    <meshLambertMaterial attach="material" color={"white"} />
-                  </mesh>
+                  )}
                 </group>
               );
             })}
@@ -106,7 +133,6 @@ export default function App() {
               <planeGeometry args={[25, 10]} />
               <meshStandardMaterial color="white" side={DoubleSide} />
             </mesh>
-            <TextModel position={[19, 4.5, 7]} />
 
             {/* Floor */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[10, 0, -2]}>
@@ -115,6 +141,7 @@ export default function App() {
             </mesh>
 
             {/* Text Spotlight */}
+            <TextModel position={[19, 4.5, 6.7]} />
           </Suspense>
         </Canvas>
       </View>
