@@ -2,7 +2,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Image,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,

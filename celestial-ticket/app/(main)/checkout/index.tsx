@@ -202,6 +202,7 @@ export default function CheckoutScreen() {
               params: {
                 totalPrice,
                 bookedSeats: JSON.stringify(bookedSeats),
+                movie,
               },
             })
           }

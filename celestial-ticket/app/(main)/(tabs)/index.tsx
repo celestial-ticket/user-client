@@ -301,43 +301,41 @@ export default function Page() {
                     {/* <Text>Longitude: {location?.coords.longitude}</Text> */}
                 </View>
 
-                {/* PROMO CAROUSEL */}
-                <View className="flex flex-row">
-                    <Carousel
-                        loop
-                        width={width}
-                        height={width / 2}
-                        autoPlay={true}
-                        // data={[...new Array(6).keys()]}
-                        data={carouselData}
-                        scrollAnimationDuration={3000}
-                        onSnapToItem={(index) =>
-                            console.log("current index:", index)
-                        }
-                        renderItem={({ item }) => (
-                            <View
-                            // style={{
-                            //     flex: 1,
-                            //     justifyContent: "center",
-                            //     alignItems: "center",
-                            //     borderRadius: 10,
-                            //     overflow: "hidden",
-                            // }}
-                            >
-                                <Image
-                                    source={{ uri: item.image }}
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                        borderRadius: 10,
-                                    }}
-                                    resizeMode="cover"
-                                />
-                            </View>
-                        )}
-                    />
-                </View>
-                {/* ----------------- */}
+        {/* PROMO CAROUSEL */}
+        <View className="flex flex-row">
+          <Carousel
+            loop
+            width={width}
+            height={width / 2}
+            autoPlay={true}
+            // data={[...new Array(6).keys()]}
+            data={carouselData}
+            scrollAnimationDuration={3000}
+            // onSnapToItem={(index) => console.log("current index:", index)}
+            renderItem={({ item }) => (
+              <View
+              // style={{
+              //     flex: 1,
+              //     justifyContent: "center",
+              //     alignItems: "center",
+              //     borderRadius: 10,
+              //     overflow: "hidden",
+              // }}
+              >
+                <Image
+                  source={{ uri: item.image }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 10,
+                  }}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
+          />
+        </View>
+        {/* ----------------- */}
 
                 {/* CARD NOW SHOWING */}
 
