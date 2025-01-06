@@ -1,7 +1,8 @@
 import * as THREE from "three";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useGLTF } from "@react-three/drei";
 import { GLTF } from "three-stdlib";
+// import CustomTextModel from "./CustomTextModel";
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -18,8 +19,16 @@ type GLTFResult = GLTF & {
 
 export default function Model(props: JSX.IntrinsicElements["group"]) {
   const { nodes, materials } = useGLTF(
-    require("../assets/model.glb")
+    require("../../assets/model.glb")
   ) as GLTFResult;
+
+  // console.log("nodes:", nodes);
+  // console.log("materials:", materials);
+
+  // if (!nodes || !materials) {
+  //   console.log("Failed to load GLTF model");
+  //   return null;
+  // }
 
   /**
    * Optimize materials and geometry
@@ -60,4 +69,4 @@ export default function Model(props: JSX.IntrinsicElements["group"]) {
   );
 }
 
-useGLTF.preload(require("../assets/model.glb"));
+useGLTF.preload(require("../../assets/model.glb"));

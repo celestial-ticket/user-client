@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import React, { useRef } from "react";
-import { useGLTF } from "@react-three/drei/native";
+import { useGLTF } from "@react-three/drei";
 import { GLTF } from "three-stdlib";
 
 type GLTFResult = GLTF & {
@@ -12,17 +12,12 @@ type GLTFResult = GLTF & {
   };
 };
 
-export default function TextModel(props: JSX.IntrinsicElements["group"]) {
+export default function AngelModel(props: JSX.IntrinsicElements["group"]) {
   const { nodes, materials } = useGLTF(
-    require("../assets/text-model.glb")
+    require("../../assets/angel.glb")
   ) as GLTFResult;
   return (
-    <group
-      {...props}
-      dispose={null}
-      scale={0.06}
-      rotation={[0, -Math.PI / 1, 0]}
-    >
+    <group {...props} dispose={null} scale={0.006} rotation={[0, -0.8, 0]}>
       <mesh
         castShadow
         receiveShadow
@@ -33,4 +28,4 @@ export default function TextModel(props: JSX.IntrinsicElements["group"]) {
   );
 }
 
-useGLTF.preload(require("../assets/text-model.glb"));
+useGLTF.preload(require("../../assets/angel.glb"));
