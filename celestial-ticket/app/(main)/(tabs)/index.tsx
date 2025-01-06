@@ -212,7 +212,7 @@ export default function Page() {
             // data={[...new Array(6).keys()]}
             data={carouselData}
             scrollAnimationDuration={3000}
-            onSnapToItem={(index) => console.log("current index:", index)}
+            // onSnapToItem={(index) => console.log("current index:", index)}
             renderItem={({ item }) => (
               <View
               // style={{
