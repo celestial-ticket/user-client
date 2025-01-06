@@ -2,6 +2,7 @@ import {
     Dimensions,
     FlatList,
     Image,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -19,6 +20,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 // ! Carousel
 import Carousel from "react-native-reanimated-carousel";
 import { Link } from "expo-router";
+import AllMovieCard from "../../components/AllMovieCard";
 
 export default function Page() {
     // ! Location
@@ -27,7 +29,6 @@ export default function Page() {
     );
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [city, setCity] = useState("");
-
 
     useEffect(() => {
         (async () => {
@@ -90,7 +91,69 @@ export default function Page() {
     ];
 
     // ! Card now showing
-    
+    const movies = [
+        {
+            title: "2nd Miracle in Cell No. 7",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 9.7,
+            genre: "Family, Drama",
+        },
+        {
+            title: "Pangggonan Wingit 2 - Miss K",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 9.3,
+            genre: "Horror",
+        },
+        {
+            title: "The Prosecutor",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 9.6,
+            genre: "Action, Thriller",
+        },
+        {
+            title: "Mufasa: The Lion King",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 9.5,
+            genre: "Animation, Adventure",
+        },
+        {
+            title: "The Batman",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 8.8,
+            genre: "Action, Crime",
+        },
+        {
+            title: "Spider-Man: No Way Home",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 9.0,
+            genre: "Action, Adventure",
+        },
+        {
+            title: "Dune",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 8.2,
+            genre: "Sci-Fi, Adventure",
+        },
+        {
+            title: "Top Gun: Maverick",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 8.5,
+            genre: "Action, Drama",
+        },
+        {
+            title: "Everything Everywhere All at Once",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 8.7,
+            genre: "Adventure, Comedy",
+        },
+        {
+            title: "Black Panther: Wakanda Forever",
+            poster: "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+            rating: 8.0,
+            genre: "Action, Adventure",
+        },
+    ];
+
     const itemWidth = width * 0.5; // Width of each item
     const data = [
         {
@@ -148,90 +211,115 @@ export default function Page() {
 
     return (
         <SafeAreaView className="bg-white h-full">
-            {/* SEARCH BAR */}
-            <View className="flex flex-row justify-center items-center mt-5">
-                <View className="flex flex-row justify-center items-center w-5/6 bg-gray-100 rounded-full mr-3">
-                    <View className="w-1/6 justify-center items-center">
-                        <Feather name="search" size={24} color="black" />
-                        {/* <Image className="w-6 h-6" /> */}
-                    </View>
-                    <TextInput placeholder="Search" className="w-5/6" />
-                </View>
-                <Link href="/profile"><FontAwesome6 name="user-circle" size={28} color="black" /></Link>
-            </View>
-            {/* ----------------- */}
-
-            {/* LOCATION */}
-            <View className="flex flex-row m-5">
-                <FontAwesome
-                    className="mr-3"
-                    name="map-marker"
-                    size={24}
-                    color="grey"
-                />
-                <Text className="text-lg uppercase">{city}</Text>
-                {/* <Text>Latitude: {location?.coords.latitude}</Text> */}
-                {/* <Text>Longitude: {location?.coords.longitude}</Text> */}
-            </View>
-
-            {/* PROMO CAROUSEL */}
-            <View className="flex flex-row">
-                <Carousel
-                    loop
-                    width={width}
-                    height={width / 2}
-                    autoPlay={true}
-                    // data={[...new Array(6).keys()]}
-                    data={carouselData}
-                    scrollAnimationDuration={3000}
-                    onSnapToItem={(index) =>
-                        console.log("current index:", index)
-                    }
-                    renderItem={({ item }) => (
-                        <View
-                        // style={{
-                        //     flex: 1,
-                        //     justifyContent: "center",
-                        //     alignItems: "center",
-                        //     borderRadius: 10,
-                        //     overflow: "hidden",
-                        // }}
-                        >
-                            <Image
-                                source={{ uri: item.image }}
-                                style={{
-                                    width: "100%",
-                                    height: "100%",
-                                    borderRadius: 10,
-                                }}
-                                resizeMode="cover"
-                            />
+            <ScrollView>
+                {/* SEARCH BAR */}
+                <View className="flex flex-row justify-center items-center mt-5">
+                    <View className="flex flex-row justify-center items-center w-5/6 bg-gray-100 rounded-full mr-3">
+                        <View className="w-1/6 justify-center items-center">
+                            <Feather name="search" size={24} color="black" />
+                            {/* <Image className="w-6 h-6" /> */}
                         </View>
-                    )}
-                />
-            </View>
-            {/* ----------------- */}
+                        <TextInput placeholder="Search" className="w-5/6" />
+                    </View>
+                    <Link href="/profile">
+                        <FontAwesome6
+                            name="user-circle"
+                            size={28}
+                            color="black"
+                        />
+                    </Link>
+                </View>
+                {/* ----------------- */}
 
-            {/* CARD NOW SHOWING */}
+                {/* LOCATION */}
+                <View className="flex flex-row m-5">
+                    <FontAwesome
+                        className="mr-3"
+                        name="map-marker"
+                        size={24}
+                        color="grey"
+                    />
+                    <Text className="text-lg uppercase">{city}</Text>
+                    {/* <Text>Latitude: {location?.coords.latitude}</Text> */}
+                    {/* <Text>Longitude: {location?.coords.longitude}</Text> */}
+                </View>
 
-            <View>
-                <Text className="m-5 font-bold text-xl">Now Showing</Text>
-                <FlatList
-                    data={data}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.title}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
-                    decelerationRate="fast" // Fast deceleration for smoother snapping
-                    snapToAlignment="center" // Snap to center
-                    contentContainerStyle={{
-                        paddingHorizontal: (width - itemWidth) / 2, // Center the first item
-                    }}
-                />
-            </View>
+                {/* PROMO CAROUSEL */}
+                <View className="flex flex-row">
+                    <Carousel
+                        loop
+                        width={width}
+                        height={width / 2}
+                        autoPlay={true}
+                        // data={[...new Array(6).keys()]}
+                        data={carouselData}
+                        scrollAnimationDuration={3000}
+                        onSnapToItem={(index) =>
+                            console.log("current index:", index)
+                        }
+                        renderItem={({ item }) => (
+                            <View
+                            // style={{
+                            //     flex: 1,
+                            //     justifyContent: "center",
+                            //     alignItems: "center",
+                            //     borderRadius: 10,
+                            //     overflow: "hidden",
+                            // }}
+                            >
+                                <Image
+                                    source={{ uri: item.image }}
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        borderRadius: 10,
+                                    }}
+                                    resizeMode="cover"
+                                />
+                            </View>
+                        )}
+                    />
+                </View>
+                {/* ----------------- */}
 
-            {/* ALL MOVIE CARD */}
+                {/* CARD NOW SHOWING */}
+                <View>
+                    <Text className="m-5 font-bold text-xl">Now Showing</Text>
+                    <FlatList
+                        data={data}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item.title}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
+                        decelerationRate="fast" // Fast deceleration for smoother snapping
+                        snapToAlignment="center" // Snap to center
+                        contentContainerStyle={{
+                            paddingHorizontal: (width - itemWidth) / 2, // Center the first item
+                        }}
+                    />
+                </View>
+
+                {/* ALL MOVIE CARD */}
+                <View className="flex-1 mt-5">
+                    <Text className="m-5 font-bold text-xl">All Movies</Text>
+                    <FlatList
+                        data={movies}
+                        renderItem={({ item }) => (
+                            <AllMovieCard
+                                title={item.title}
+                                poster={item.poster}
+                                rating={item.rating}
+                                genre={item.genre}
+                            />
+                        )}
+                        keyExtractor={(item) => item.title}
+                        numColumns={2} // Menentukan jumlah kolom
+                        columnWrapperStyle={{ justifyContent: "space-between" }}
+                        contentContainerStyle={{ paddingHorizontal: 10 }}
+                    />
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
