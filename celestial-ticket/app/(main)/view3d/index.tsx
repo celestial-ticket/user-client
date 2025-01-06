@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from "expo-router";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, Modal } from "react-native";
 import { Suspense } from "react";
 import { Canvas, extend } from "@react-three/fiber";
 import useControls from "r3f-native-orbitcontrols";

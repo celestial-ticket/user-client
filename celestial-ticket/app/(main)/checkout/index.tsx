@@ -1,6 +1,14 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { Text, View, TouchableOpacity, ScrollView } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Pressable,
+} from "react-native";
+import { toRupaih } from "../../../helpers/toRupiah";
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -9,12 +17,15 @@ export default function CheckoutScreen() {
   const parsedShow = Array.isArray(show)
     ? JSON.parse(show[0])
     : JSON.parse(show);
-  const { time, seats } = parsedShow;
+  const { time, seats, price } = parsedShow;
 
   //   const memoSeats = useMemo(() => seats, [seats]);
   const [seatsData, setSeatsData] = useState([]);
+  const [bookedSeats, setBookedSeats] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const arrangeSeats = (flatSeats) => {
+  const arrangeSeats = (flatSeats: [string, string][]) => {
     const rows = {};
     flatSeats.forEach(([seat, status]) => {
       const rowKey = seat[0]; // First character of seat code (e.g., 'A' for 'A1')
@@ -31,20 +42,58 @@ export default function CheckoutScreen() {
     });
     return Object.values(rows);
   };
+  const calculatePriceSummary = (arrangedSeats: {}[]) => {
+    const bookedSeats = [];
+    let total = 0;
+
+    arrangedSeats.forEach((row) => {
+      ["left", "middle", "right"].forEach((section) => {
+        row[section].forEach(([seat, status]) => {
+          if (status === "Booked") {
+            bookedSeats.push(seat);
+            total += price;
+          }
+        });
+      });
+    });
+
+    return { total, booked: bookedSeats };
+  };
 
   useEffect(() => {
     const arrangedSeats = arrangeSeats(seats);
     setSeatsData(arrangedSeats);
   }, []);
 
-  const toggleSeatStatus = (rowIndex, section, seatIndex) => {
+  useEffect(() => {
+    const { total, booked } = calculatePriceSummary(seatsData);
+    setBookedSeats(booked);
+    setTotalPrice(total);
+    if (booked.length === 0) {
+      setModalVisible(false);
+    }
+  }, [seatsData]);
+
+  const toggleSeatStatus = (
+    rowIndex: number,
+    section: string,
+    seatIndex: number
+  ) => {
     const updatedSeats = [...seatsData];
     const seat = updatedSeats[rowIndex][section][seatIndex];
     seat[1] = seat[1] === "Booked" ? "Available" : "Booked";
     setSeatsData(updatedSeats);
+    setModalVisible(true);
   };
 
-  const renderRow = (rowSeats, rowIndex) => (
+  const renderRow = (
+    rowSeats: {
+      left: [string, string][];
+      middle: [string, string][];
+      right: [string, string][];
+    },
+    rowIndex: number
+  ) => (
     <View key={rowIndex} className="flex-row justify-center mb-4 gap-12">
       {/* Left Section */}
       <View className="flex-row">
@@ -105,10 +154,38 @@ export default function CheckoutScreen() {
           </View>
         </View>
       </ScrollView>
-
-      <View className="absolute bottom-0 w-full">
+      <View className="mt-4">
         <TouchableOpacity
-          className="mb-2 p-2 bg-amber-500 rounded w-1/2 mx-auto"
+          className="p-2 bg-green-600 rounded"
+          onPress={() => setModalVisible(true)}
+        >
+          <Text className="text-white text-center">View Summary</Text>
+        </TouchableOpacity>
+      </View>
+      {/* <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      > */}
+      <Pressable
+        onPress={() => setModalVisible(false)}
+        className={`w-screen bg-slate-100 p-4 rounded absolute bottom-0  ${
+          modalVisible ? "visible" : "hidden"
+        }`}
+      >
+        <View className="flex-row justify-between w-screen">
+          <Text className="text-lg font-bold mb-2">Price Summary</Text>
+          <Text className="text-lg text-black mb-2 right-8">
+            {bookedSeats.length} x {toRupaih(price)}
+          </Text>
+        </View>
+        <Text className="mb-2">
+          Booked Seats: {bookedSeats.join(", ") || "None"}
+        </Text>
+        <Text className="mb-4">Total Price: {toRupaih(totalPrice)}</Text>
+        <TouchableOpacity
+          className="p-2 bg-yellow-500 rounded mb-2"
           onPress={() =>
             router.push({
               pathname: "view3d",
@@ -118,7 +195,22 @@ export default function CheckoutScreen() {
         >
           <Text className="text-white text-center">3D VIEW</Text>
         </TouchableOpacity>
-      </View>
+        <TouchableOpacity
+          className="p-2 bg-blue-500 rounded"
+          onPress={() =>
+            router.push({
+              pathname: "payment",
+              params: {
+                totalPrice,
+                bookedSeats: JSON.stringify(bookedSeats),
+              },
+            })
+          }
+        >
+          <Text className="text-white text-center">Continue</Text>
+        </TouchableOpacity>
+      </Pressable>
+      {/* </Modal> */}
     </View>
   );
 }
