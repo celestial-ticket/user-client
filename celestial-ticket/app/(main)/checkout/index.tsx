@@ -5,7 +5,6 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  Modal,
   Pressable,
 } from "react-native";
 import { toRupaih } from "../../../helpers/toRupiah";
@@ -13,7 +12,7 @@ import { toRupaih } from "../../../helpers/toRupiah";
 export default function CheckoutScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { show } = params;
+  const { show, movie } = params;
   const parsedShow = Array.isArray(show)
     ? JSON.parse(show[0])
     : JSON.parse(show);
@@ -142,7 +141,7 @@ export default function CheckoutScreen() {
 
   return (
     <View className="flex-1 p-4 bg-white">
-      <Text className="text-2xl font-bold mb-4">Checkout Screen</Text>
+      <Text className="text-2xl font-bold mb-4">{movie}</Text>
       <Text className="text-lg mb-4">Show Time: {time}</Text>
       <ScrollView horizontal>
         <View>
