@@ -69,6 +69,9 @@ export default function CheckoutScreen() {
     const { total, booked } = calculatePriceSummary(seatsData);
     setBookedSeats(booked);
     setTotalPrice(total);
+    if (booked.length === 0) {
+      setModalVisible(false);
+    }
   }, [seatsData]);
 
   const toggleSeatStatus = (
@@ -80,6 +83,7 @@ export default function CheckoutScreen() {
     const seat = updatedSeats[rowIndex][section][seatIndex];
     seat[1] = seat[1] === "Booked" ? "Available" : "Booked";
     setSeatsData(updatedSeats);
+    setModalVisible(true);
   };
 
   const renderRow = (
@@ -158,50 +162,55 @@ export default function CheckoutScreen() {
           <Text className="text-white text-center">View Summary</Text>
         </TouchableOpacity>
       </View>
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
+      > */}
+      <Pressable
+        onPress={() => setModalVisible(false)}
+        className={`w-screen bg-slate-100 p-4 rounded absolute bottom-0  ${
+          modalVisible ? "visible" : "hidden"
+        }`}
       >
-        <Pressable
-          className="flex-1 justify-center items-center bg-black/50"
-          onPress={() => setModalVisible(false)}
+        <View className="flex-row justify-between w-screen">
+          <Text className="text-lg font-bold mb-2">Price Summary</Text>
+          <Text className="text-lg text-black mb-2 right-8">
+            {bookedSeats.length} x {toRupaih(price)}
+          </Text>
+        </View>
+        <Text className="mb-2">
+          Booked Seats: {bookedSeats.join(", ") || "None"}
+        </Text>
+        <Text className="mb-4">Total Price: {toRupaih(totalPrice)}</Text>
+        <TouchableOpacity
+          className="p-2 bg-yellow-500 rounded mb-2"
+          onPress={() =>
+            router.push({
+              pathname: "view3d",
+              params: { seats: JSON.stringify(seatsData) },
+            })
+          }
         >
-          <View className="w-4/5 bg-white p-4 rounded">
-            <Text className="text-lg font-bold mb-2">Price Summary</Text>
-            <Text className="mb-2">
-              Booked Seats: {bookedSeats.join(", ") || "None"}
-            </Text>
-            <Text className="mb-4">Total Price: {toRupaih(totalPrice)}</Text>
-            <TouchableOpacity
-              className="p-2 bg-yellow-500 rounded mb-2"
-              onPress={() =>
-                router.push({
-                  pathname: "view3d",
-                  params: { seats: JSON.stringify(seatsData) },
-                })
-              }
-            >
-              <Text className="text-white text-center">3D VIEW</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="p-2 bg-blue-500 rounded"
-              onPress={() =>
-                router.push({
-                  pathname: "payment",
-                  params: {
-                    totalPrice,
-                    bookedSeats: JSON.stringify(bookedSeats),
-                  },
-                })
-              }
-            >
-              <Text className="text-white text-center">Continue</Text>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
-      </Modal>
+          <Text className="text-white text-center">3D VIEW</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="p-2 bg-blue-500 rounded"
+          onPress={() =>
+            router.push({
+              pathname: "payment",
+              params: {
+                totalPrice,
+                bookedSeats: JSON.stringify(bookedSeats),
+              },
+            })
+          }
+        >
+          <Text className="text-white text-center">Continue</Text>
+        </TouchableOpacity>
+      </Pressable>
+      {/* </Modal> */}
     </View>
   );
 }
