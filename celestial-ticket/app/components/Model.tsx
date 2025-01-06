@@ -25,10 +25,10 @@ export default function Model(props: JSX.IntrinsicElements["group"]) {
   // console.log("nodes:", nodes);
   // console.log("materials:", materials);
 
-  if (!nodes || !materials) {
-    console.log("Failed to load GLTF model");
-    return null;
-  }
+  // if (!nodes || !materials) {
+  //   console.log("Failed to load GLTF model");
+  //   return null;
+  // }
 
   /**
    * Optimize materials and geometry

@@ -28,18 +28,36 @@ const createRowPositions = (rows: number, columns: number, xOffset: number) => {
 export default function View3D() {
   const params = useLocalSearchParams();
   const { seats } = params;
+  console.log("🚀 ~ View3D ~ seats:", seats);
 
   const parsedSeats = Array.isArray(seats)
     ? JSON.parse(seats[0])
     : JSON.parse(seats);
-  console.log("🚀 ~ View3D ~ parsedSeats:", parsedSeats);
+  console.log("🚀 ~ View3D ~ parsedSeats:", parsedSeats[0]);
 
-  const seatStatus = parsedSeats.reduce((acc: {}, [seat, status]) => {
-    acc[seat] = status;
-    return acc;
-  }, {});
+  const flattenSeats = (arrangedSeats) => {
+    const flatSeats = [];
 
-  const seatCodes = "ABCDEF";
+    arrangedSeats.forEach((row: {}) => {
+      ["left", "middle", "right"].forEach((section) => {
+        row[section].forEach((seat: []) => {
+          flatSeats.push(seat);
+        });
+      });
+    });
+
+    return flatSeats;
+  };
+
+  const seatStatus = flattenSeats(parsedSeats).reduce(
+    (acc: {}, [seat, status]) => {
+      acc[seat] = status;
+      return acc;
+    },
+    {}
+  );
+
+  const seatCodes = "EDCBA";
   const seatNumbers = {};
 
   const rows = 5;
