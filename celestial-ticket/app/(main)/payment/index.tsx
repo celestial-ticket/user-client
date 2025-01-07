@@ -70,7 +70,14 @@ export default function PaymentScreen() {
             if (event.url.includes("finish")) {
               alert("Payment Successful");
               console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
-              router.push("/order-detail"); // Navigate to order-detail screen
+              router.push({
+                pathname: "/order-detail",
+                params: {
+                  totalPrice,
+                  bookedSeats: JSON.stringify(bookedSeats),
+                  movie,
+                },
+              }); // Navigate to order-detail screen
             } else if (event.url.includes("error")) {
               alert("Payment Failed");
               console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
