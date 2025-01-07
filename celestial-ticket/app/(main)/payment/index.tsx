@@ -5,7 +5,7 @@ import { WebView } from "react-native-webview";
 import { useState } from "react";
 import { CREATE_PAYMENT_TOKEN } from "../../../mutations/midtrans";
 import React from "react";
-import { toRupaih } from "../../../helpers/toRupiah";
+import { toRupiah } from "../../../helpers/toRupiah";
 
 export default function PaymentScreen() {
   const router = useRouter();
@@ -91,7 +91,7 @@ export default function PaymentScreen() {
         >
           <Text>Movie: {movie}</Text>
           <Text>Seats: {arrayBookedSeats.join(" ")}</Text>
-          <Text>Total: {toRupaih(+totalPrice)}</Text>
+          <Text>Total: {toRupiah(+totalPrice)}</Text>
           <Button title="Start Payment" onPress={handlePayment} />
           <Text>No WebView URL</Text>
         </View>

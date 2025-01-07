@@ -6,19 +6,19 @@ export default function Card({ item }) {
     const itemWidth = width * 0.5;
     return (
         <View
-            className="bg-gray-500 rounded-lg ml-3 mr-3"
+            className=" rounded-lg ml-3 mr-3"
             style={{ width: itemWidth }}
         >
             <TouchableOpacity
                 onPress={() =>
                     router.push({
                         pathname: "detail-film",
-                        params: { item: JSON.stringify(item) },
+                        params: { movieId: item._id , item: JSON.stringify(item) },
                     })
                 }
             >
                 <Image
-                    source={{ uri: item.image }}
+                    source={{ uri: item.thumbnail }}
                     className="h-96 w-full rounded-lg"
                 />
             </TouchableOpacity>

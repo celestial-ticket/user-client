@@ -223,7 +223,7 @@ export default function Page() {
                                 genre={item.genre}
                             />
                         )}
-                        keyExtractor={(item) => item.title}
+                        keyExtractor={(item) => item._id}
                         numColumns={2}
                         columnWrapperStyle={{ justifyContent: "space-between" }}
                         contentContainerStyle={{ paddingHorizontal: 10 }}

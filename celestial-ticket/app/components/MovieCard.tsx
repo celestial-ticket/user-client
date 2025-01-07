@@ -9,7 +9,7 @@ export default function AllMovieCard({ item, title, poster, ageRating, genre }) 
                 onPress={() =>
                     router.push({
                         pathname: "detail-film",
-                        params: { item: JSON.stringify(item) },
+                        params: { movieId: item._id, item: JSON.stringify(item) },
                     })
                 }
             >

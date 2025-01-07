@@ -7,7 +7,7 @@ import {
   ScrollView,
   Pressable,
 } from "react-native";
-import { toRupaih } from "../../../helpers/toRupiah";
+import { toRupiah } from "../../../helpers/toRupiah";
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -16,7 +16,9 @@ export default function CheckoutScreen() {
   const parsedShow = Array.isArray(show)
     ? JSON.parse(show[0])
     : JSON.parse(show);
-  const { time, seats, price } = parsedShow;
+    console.log("🚀 ~ CheckoutScreen ~ parsedShow", parsedShow);
+    
+  const { time, seatList: seats, price } = parsedShow;
 
   //   const memoSeats = useMemo(() => seats, [seats]);
   const [seatsData, setSeatsData] = useState([]);
@@ -48,7 +50,7 @@ export default function CheckoutScreen() {
     arrangedSeats.forEach((row) => {
       ["left", "middle", "right"].forEach((section) => {
         row[section].forEach(([seat, status]) => {
-          if (status === "Booked") {
+          if (status === "booked") {
             bookedSeats.push(seat);
             total += price;
           }
@@ -80,7 +82,7 @@ export default function CheckoutScreen() {
   ) => {
     const updatedSeats = [...seatsData];
     const seat = updatedSeats[rowIndex][section][seatIndex];
-    seat[1] = seat[1] === "Booked" ? "Available" : "Booked";
+    seat[1] = seat[1] === "booked" ? "available" : "booked";
     setSeatsData(updatedSeats);
     setModalVisible(true);
   };
@@ -100,7 +102,7 @@ export default function CheckoutScreen() {
           <TouchableOpacity
             key={seat}
             className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
-              status === "Available" ? "bg-green-500" : "bg-red-500"
+              status === "available" ? "bg-green-500" : "bg-red-500"
             }`}
             onPress={() => toggleSeatStatus(rowIndex, "left", index)}
           >
@@ -114,9 +116,10 @@ export default function CheckoutScreen() {
           <TouchableOpacity
             key={seat}
             className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
-              status === "Available" ? "bg-green-500" : "bg-red-500"
+              status === "available" ? "bg-green-500" : status === "booked" ? "bg-blue-500": "bg-red-500"
             }`}
             onPress={() => toggleSeatStatus(rowIndex, "middle", index)}
+            disabled={status === "unavailable"}
           >
             <Text className="text-white font-bold">{seat}</Text>
           </TouchableOpacity>
@@ -128,7 +131,7 @@ export default function CheckoutScreen() {
           <TouchableOpacity
             key={seat}
             className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
-              status === "Available" ? "bg-green-500" : "bg-red-500"
+              status === "available" ? "bg-green-500" : "bg-red-500"
             }`}
             onPress={() => toggleSeatStatus(rowIndex, "right", index)}
           >
@@ -176,13 +179,13 @@ export default function CheckoutScreen() {
         <View className="flex-row justify-between w-screen">
           <Text className="text-lg font-bold mb-2">Price Summary</Text>
           <Text className="text-lg text-black mb-2 right-8">
-            {bookedSeats.length} x {toRupaih(price)}
+            {bookedSeats.length} x {toRupiah(price)}
           </Text>
         </View>
         <Text className="mb-2">
           Booked Seats: {bookedSeats.join(", ") || "None"}
         </Text>
-        <Text className="mb-4">Total Price: {toRupaih(totalPrice)}</Text>
+        <Text className="mb-4">Total Price: {toRupiah(totalPrice)}</Text>
         <TouchableOpacity
           className="p-2 bg-yellow-500 rounded mb-2"
           onPress={() =>
