@@ -72,17 +72,25 @@ export default function LoginPage() {
   return (
     <SafeAreaProvider>
       <LinearGradient
-        colors={["#1e3a8a", "#1e40af", "#3b82f6"]}
+         colors={["#1e293b", "#172a4f", "#312e81"]}
         style={{ flex: 1 }}
       >
         <SafeAreaView className="flex justify-center items-center h-full">
           <View className="mb-10">
-            <Text className="text-6xl font-extrabold text-white">CelTix</Text>
+            <Text className="text-6xl font-extrabold text-orange-400">
+              Cel-Tix
+            </Text>
+            <View className="flex-row mt-2">
+              <View className="w-4 h-4 bg-orange-400 rounded-full mx-1" />
+              <View className="w-4 h-4 bg-blue-500 rounded-full mx-1" />
+              <View className="w-4 h-4 bg-sky-400 rounded-full mx-1" />
+            </View>
           </View>
-          <View className="m-8">
+
+          <View className="m-8 bg-blue-900 bg-opacity-50 p-6 rounded-3xl shadow-lg">
             {/* EMAIL */}
             <TextInput
-              className="bg-gray-800 w-96 h-16 px-5 rounded-3xl mb-3 font-bold text-white shadow-lg"
+              className="bg-gray-900 w-96 h-16 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-orange-400"
               placeholder="Email"
               placeholderTextColor={"#a1a1aa"}
               value={formData.email}
@@ -90,7 +98,7 @@ export default function LoginPage() {
             />
             {/* PASSWORD */}
             <TextInput
-              className="bg-gray-800 w-96 h-16 px-5 rounded-3xl mb-3 font-bold text-white shadow-lg"
+              className="bg-gray-900 w-96 h-16 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-orange-400"
               placeholder="Password"
               placeholderTextColor={"#a1a1aa"}
               secureTextEntry={true}
@@ -99,27 +107,40 @@ export default function LoginPage() {
             />
             {/* LOGIN BUTTON */}
             <TouchableOpacity
-              className="bg-blue-500 w-96 h-14 rounded-2xl mb-3 flex justify-center shadow-md hover:bg-blue-600 transition duration-200"
+              className="bg-orange-400 w-96 h-14 rounded-3xl mb-3 flex justify-center shadow-md hover:bg-orange-500 transition duration-200"
               onPress={handleSubmit}
               disabled={loading}
             >
-              <Text className="text-center font-bold text-white">
+              <Text className="text-center font-bold text-blue-900">
                 {loading ? "Logging In..." : "Log In"}
               </Text>
             </TouchableOpacity>
 
-            {/* CREATE AN ACCOUNT BUTTON */}
+            {/* DON'T HAVE AN ACCOUNT */}
             <TouchableOpacity
-              className="w-96 h-14 border-2 rounded-2xl flex justify-center border-blue-500 hover:bg-blue-500 transition duration-200"
+              className="w-96 mt-4 flex items-center"
               onPress={() => {
-                console.log("Create Account");
+                console.log("Navigate to Register");
                 router.push("register"); // Navigate to the register page
               }}
             >
-              <Text className="text-center font-bold text-blue-500">
-                Create an account
+              <Text className="text-center font-bold text-orange-400 underline">
+                Don't have an account? Register here
               </Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Decorative Sketched Cinema Elements */}
+          <View className="absolute bottom-10 w-full flex-row justify-center space-x-4 opacity-50">
+            <View className="h-16 w-16 bg-transparent border-2 border-orange-400 rounded-full flex items-center justify-center">
+              <Text className="text-white text-lg">🎥</Text>
+            </View>
+            <View className="h-16 w-16 bg-transparent border-2 border-blue-500 rounded-full flex items-center justify-center">
+              <Text className="text-white text-lg">🎬</Text>
+            </View>
+            <View className="h-16 w-16 bg-transparent border-2 border-sky-400 rounded-full flex items-center justify-center">
+              <Text className="text-white text-lg">🍿</Text>
+            </View>
           </View>
         </SafeAreaView>
       </LinearGradient>
