@@ -52,6 +52,7 @@ export default function RegisterPage() {
   };
   if (error) {
     Alert.alert("Register Failed", error.message);
+    router.replace("register");
   }
 
   return (

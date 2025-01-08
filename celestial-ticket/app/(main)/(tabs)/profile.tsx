@@ -29,21 +29,8 @@ export default function ProfileScreen() {
       const userToken = await SecureStore.getItemAsync("accessToken");
       console.log("🚀 ~ fetchUser ~ userToken:", userToken);
 
-      if (userToken) {
-        // Contoh data pengguna, ubah sesuai kebutuhan
-        // setUser({
-        //   id: 1,
-        //   name: "John Doe",
-        //   email: "johndoe@example.com",
-        //   phoneNumber: "+1234567890",
-        //   address: "Jakarta, Indonesia",
-        //   gender: "male",
-        //   coordinates: {
-        //     latitude: 37.7749,
-        //     longitude: -122.4194,
-        //   },
-        // });
-      } else {
+      if (!userToken) {
+        router.dismiss();
         router.push("login"); // Arahkan ke halaman login jika belum login
       }
     };
@@ -68,10 +55,24 @@ export default function ProfileScreen() {
     }
   };
 
-  if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
+  if (loading)
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
   if (error) return <Text>Error: {error.message}</Text>;
 
   const { user } = data;
+
+  const handleOrderPress = (order) => {
+    router.push({
+      pathname: "/order-detail",
+      params: {
+        existingOrder: JSON.stringify(order),
+      },
+    });
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -97,7 +98,11 @@ export default function ProfileScreen() {
         <Text className="m-5 font-semibold">My Tickets</Text>
         {user.orders.map((order, index) => {
           return (
-            <View className="" key={index}>
+            <TouchableOpacity
+              className=""
+              key={index}
+              onPress={() => handleOrderPress(order)}
+            >
               <View className="bg-blue-900 me-3 ml-3 p-5 rounded-t-md">
                 <Text className="text-[#f4c366] font-extrabold text-xl mb-3">
                   {order.movie.title}
@@ -111,15 +116,19 @@ export default function ProfileScreen() {
                       .join("-")}
                   </Text>
                   <Text className="text-white">Cinema</Text>
-                  <Text className="text-white font-bold text-xl mb-3">{order.cinema.name}</Text>
+                  <Text className="text-white font-bold text-xl mb-3">
+                    {order.cinema.name}
+                  </Text>
                   <Text className="text-white">Time</Text>
-                  <Text className="text-white font-bold text-xl mb-3">{formatTime(order.showTime.startTime)}</Text>
+                  <Text className="text-white font-bold text-xl mb-3">
+                    {formatTime(order.showTime.startTime)}
+                  </Text>
                 </View>
               </View>
               <View className="bg-[#f4c366] mr-3 ml-3 mb-5 p-5 rounded-b-md">
                 <Text>Ticket {order.seats.join(", ")}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
             // <Ticket
             //   key={order.id}
             //   title={order.movie.title}
@@ -163,7 +172,7 @@ export default function ProfileScreen() {
 
         {/* Logout Button */}
         <TouchableOpacity
-          className="bg-red-600 w-96 h-12 rounded-2xl mt-5 flex justify-center items-center mx-auto"
+          className="bg-red-600 w-96 h-12 rounded-2xl mt-5 flex justify-center items-center mx-auto mb-8"
           onPress={handleLogout}
         >
           <Text className="text-center text-white font-bold">Log Out</Text>

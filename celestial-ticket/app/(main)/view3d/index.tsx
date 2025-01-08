@@ -141,7 +141,7 @@ export default function View3D() {
                         rotation: [-Math.PI / 2, 0, 0],
                       }}
                       text={seatPosition}
-                      color={"white"}
+                      color={status === "available" ? "white" : "black"}
                     />
                   )}
                 </group>

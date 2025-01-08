@@ -3,14 +3,19 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 
 export default function AllMovieCard({
+  width,
   item,
   title,
   poster,
   ageRating,
   genre,
 }) {
+  console.log(item, "item");
+
   return (
-    <View className="bg-white rounded-lg shadow-md m-2 w-48">
+    <View
+      className={`bg-white rounded-lg shadow-md m-2 ${width ? " " : "w-48"}`}
+    >
       <TouchableOpacity
         onPress={() =>
           router.push({

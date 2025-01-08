@@ -7,6 +7,12 @@ import { useQuery } from "@apollo/client";
 import { toRupiah } from "../../../helpers/toRupiah";
 import { formatTime } from "../../../helpers/convertTimeStamp";
 import { useMovie } from "../../../contexts/MovieContext";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+
+import moment from "moment";
+import DateTimePicker from "@react-native-community/datetimepicker";
+
+// import CalendarStrip from "react-native-calendar-strip";
 
 const generateSeats = (rows: number, columns: number) => {
   const seatCodes = "ABCDE"; // 5 rows
@@ -44,37 +50,27 @@ export default function DetailFilmScreen() {
     ? JSON.parse(item[0])
     : JSON.parse(item);
 
-  // console.log("🚀 ~ DetailFilmScreen ~ params:", parsedItem);
+  console.log("🚀 ~ DetailFilmScreen ~ params:", parsedItem);
 
   const movieId = parsedItem._id;
   setMovieId(movieId);
   // console.log("🚀 ~ DetailFilmScreen ~ movieId:", movieId);
 
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedCinemas, setSelectedCinemas] = useState(null);
 
   // ! <><><>  Wiring  <><><>
   const { loading, error, data } = useQuery(GET_SHOWTIME, {
     variables: {
       movieId,
-      date: "2025-01-10",
+      date: selectedDate || "2025-01-10",
       userLocation: {
         coordinates: [longitude, latitude],
         type: "Point",
       },
     },
   });
-
-  const o = {
-    movieId,
-    date: "2025-01-10",
-    userLocation: {
-      coordinates: [longitude, latitude],
-      type: "Point",
-    },
-  };
-  // console.log("🚀 ~ DetailFilmScreen ~ o:", o);
-
-  // console.log("🚀 ~ DetailFilmScreen ~ data:", data);
 
   if (loading) {
     return (
@@ -102,14 +98,53 @@ export default function DetailFilmScreen() {
     }
   };
 
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker((prevShowDatePicker) => !prevShowDatePicker);
+    setSelectedDate(currentDate);
+  };
+
   return (
-    <ScrollView>
-      <Image source={{ uri: parsedItem.image }} className="w-full h-96" />
-      <Text className="text-2xl font-bold mb-4 text-center">
-        {parsedItem.title}
-      </Text>
-      <Text className="text-lg mb-4">Title {parsedItem.title}</Text>
-      {/* {console.log(parsedItem.movieStatus, "<<< ITEM")} */}
+    <ScrollView className="flex-1">
+      <Image
+        source={{ uri: parsedItem.thumbnail }}
+        className="w-full h-96 object-cover"
+      />
+      <View className="p-4">
+        <Text className="text-2xl font-bold mb-4 text-center">
+          {parsedItem.title}
+        </Text>
+        <Text className="text-lg m-2 mb-0 font-bold">Title</Text>
+        <Text className="text-lg m-2 mt-0">{parsedItem.title}</Text>
+        <Text className="text-baset text-justify m-2 mb-0 font-bold">
+          Synopsis
+        </Text>
+        <Text className="text-baset text-justify m-2 mt-0">
+          {parsedItem.synopsis}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        onPress={() => setShowDatePicker(true)}
+        className="bg-blue-700 p-3 rounded-lg my-4 w-11/12 mx-auto flex flex-row justify-center items-center"
+      >
+        <View className="flex-row justify-center items-center gap-4">
+          <Text className="text-white text-center mr-2">Select Date</Text>
+          <FontAwesome6 name="calendar" size={24} color="white" />
+        </View>
+      </TouchableOpacity>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          onChange={onChange}
+          minimumDate={new Date()}
+          maximumDate={new Date(2025, 12, 31)}
+        />
+      )}
+
       {parsedItem.movieStatus == "Now Showing" &&
         data.getShowTimes.map((showTime) => (
           <View key={showTime.cinema._id} className="mb-4">

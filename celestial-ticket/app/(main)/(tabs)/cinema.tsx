@@ -1,42 +1,27 @@
+import React, { useState, useEffect } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as SecureStore from "expo-secure-store";
+import * as Location from "expo-location";
 import { useQuery } from "@apollo/client";
 import { GET_NEARBY_CINEMAS } from "../../../mutations/cinema";
 import { useMovies } from "../../../contexts/MoviesContext";
-import { useState } from "react";
-// const cinemas = [
-//   "Cinema 1",
-//   "Cinema 2",
-//   "Cinema 3",
-//   "Cinema 4",
-//   "Cinema 5",
-//   "Cinema 6",
-//   "Cinema 7",
-//   "Cinema 8",
-//   "Cinema 9",
-//   "Cinema 10",
-//   "Cinema 1",
-//   "Cinema 2",
-//   "Cinema 3",
-//   "Cinema 4",
-//   "Cinema 5",
-//   "Cinema 6",
-//   "Cinema 7",
-//   "Cinema 8",
-//   "Cinema 9",
-//   "Cinema 10",
-// ];
+import AllMovieCard from "../../components/MovieCard";
+import { useRouter } from "expo-router";
 
 const transformCinemaData = (cinemas, nowShowing) => {
-  //   console.log("🚀 ~ transformCinemaData ~ cinemas:", cinemas);
   return cinemas?.map((cinema) => {
     const movies = cinema.showTimes
       .map((showTime) => {
         const movie = nowShowing.find(
           (movie) => movie._id === showTime.movieId
         );
-        return movie ? { _id: movie._id, title: movie.title } : null;
+        return movie
+          ? {
+              ...movie,
+              showTime: showTime,
+            }
+          : null;
       })
       .filter((movie) => movie !== null);
 
@@ -48,39 +33,81 @@ const transformCinemaData = (cinemas, nowShowing) => {
 };
 
 export default function CinemaScreen() {
+  const router = useRouter();
   const [expandedCinema, setExpandedCinema] = useState(null);
 
-  const location = SecureStore.getItem("location");
-  const userLocation = JSON.parse(location);
-  const { latitude, longitude } = userLocation.coords;
-  const { data: movieData } = useMovies();
-  const { nowShowing } = movieData;
+  const [location, setLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        throw "Permission to access location was denied";
+      }
+      let storedLocation = await SecureStore.getItemAsync("location");
+      if (storedLocation) {
+        setLocation(JSON.parse(storedLocation));
+      } else {
+        await Location.enableNetworkProviderAsync();
+
+        let currentLocation = await Location.getCurrentPositionAsync({});
+        await SecureStore.setItemAsync(
+          "location",
+          JSON.stringify(currentLocation)
+        );
+        setLocation(currentLocation);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (location) {
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    }
+  }, [location]);
+
+  const {
+    data: movieData,
+    loading: moviesLoading,
+    error: moviesError,
+  } = useMovies();
 
   const { loading, error, data } = useQuery(GET_NEARBY_CINEMAS, {
     variables: {
       userLocation: {
-        coordinates: [longitude, latitude],
+        coordinates: [userLocation.longitude, userLocation.latitude],
         type: "Point",
       },
       maxDistance: 50,
     },
   });
+
+  if (moviesLoading || loading)
+    return <Text className="h-screen my-auto text-center">Loading...</Text>;
+
+  if (moviesError || error)
+    return (
+      <Text className="h-screen my-auto text-center">
+        {moviesError ? moviesError.message : error.message}
+      </Text>
+    );
+
+  const { nowShowing } = movieData;
   const transformedData = transformCinemaData(
     data?.getNearbyCinemas,
     nowShowing
   );
-  console.log("🚀 ~ CinemaScreen ~ transformedData:", transformedData);
 
   const toggleCinema = (cinemaId) => {
     setExpandedCinema(expandedCinema === cinemaId ? null : cinemaId);
   };
-
-  if (loading)
-    return <Text className="h-screen my-auto text-center">Loading...</Text>;
-  if (error)
-    return (
-      <Text className="h-screen my-auto text-center">{error.message}</Text>
-    );
 
   return (
     <ScrollView className="flex-1">
@@ -100,9 +127,21 @@ export default function CinemaScreen() {
           {expandedCinema === cinema._id && (
             <View className="mt-2">
               {cinema.movies.map((movie) => (
-                <Text key={movie._id} className="ml-10">
-                  {movie.title}
-                </Text>
+                <AllMovieCard
+                  width={"w-full"}
+                  key={movie._id}
+                  item={movie}
+                  title={movie.title}
+                  poster={movie.thumbnail}
+                  ageRating={movie.ageRating}
+                  genre={movie.genre}
+                  onPress={() =>
+                    router.push({
+                      pathname: "detail-film",
+                      params: { item: JSON.stringify(movie) },
+                    })
+                  }
+                />
               ))}
             </View>
           )}

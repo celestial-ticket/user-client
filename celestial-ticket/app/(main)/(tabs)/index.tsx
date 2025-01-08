@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
@@ -39,34 +40,38 @@ export default function Page() {
 
   useEffect(() => {
     (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        throw "Permission to access location was denied";
+      }
       const storageLocation = await SecureStorage.getItemAsync("location");
       let location;
       if (storageLocation) {
-        setLocation(JSON.parse(storageLocation));
         location = JSON.parse(storageLocation);
+        setLocation(location);
       } else {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
-          return;
-        }
+        await Location.enableNetworkProviderAsync();
 
         location = await Location.getCurrentPositionAsync({});
-
         SecureStorage.setItemAsync("location", JSON.stringify(location));
         setLocation(location);
       }
-
-      //   console.log("🚀 ~ location:", location);
+      console.log(location, "LOCATION IN HOME");
       // get city name
       const { latitude, longitude } = location.coords;
       console.log("🚀 ~ latitude:", latitude);
-      let address = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
-      if (address.length > 0) {
-        setCity(address[0].city || address[0].region || "Unknown City");
+      try {
+        let address = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
+        console.log("🚀 ~ address:", address);
+        if (address.length > 0) {
+          setCity(address[0].city || address[0].region || "Unknown City");
+        }
+      } catch (error) {
+        Alert.alert("Error", error.message);
+        console.log("🚀 ~ error:", error);
       }
     })();
   }, []);
