@@ -1,11 +1,12 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, Text, TouchableOpacity, View, ScrollView } from "react-native";
-
+import * as SecureStore from "expo-secure-store";
 import { GET_SHOWTIME } from "../../../mutations/showTimes";
 import { useQuery } from "@apollo/client";
 import { toRupiah } from "../../../helpers/toRupiah";
 import { formatTime } from "../../../helpers/convertTimeStamp";
+import { useMovie } from "../../../contexts/MovieContext";
 
 const generateSeats = (rows: number, columns: number) => {
   const seatCodes = "ABCDE"; // 5 rows
@@ -32,16 +33,49 @@ const groupShowTimesByCinema = (showTimes) => {
 };
 
 export default function DetailFilmScreen() {
+  const { setMovieId } = useMovie();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { item, movieId } = params;
+  const { item } = params;
+  const location = JSON.parse(SecureStore.getItem("location"));
+  const { latitude, longitude } = location.coords;
+  // Parse the item data
+  const parsedItem = Array.isArray(item)
+    ? JSON.parse(item[0])
+    : JSON.parse(item);
+
+  // console.log("🚀 ~ DetailFilmScreen ~ params:", parsedItem);
+
+  const movieId = parsedItem._id;
+  setMovieId(movieId);
+  // console.log("🚀 ~ DetailFilmScreen ~ movieId:", movieId);
+
   const [selectedCinemas, setSelectedCinemas] = useState(null);
 
   // ! <><><>  Wiring  <><><>
   const { loading, error, data } = useQuery(GET_SHOWTIME, {
-    variables: { movieId, date: "2025-01-10" },
+    variables: {
+      movieId,
+      date: "2025-01-10",
+      userLocation: {
+        coordinates: [longitude, latitude],
+        type: "Point",
+      },
+    },
   });
-  console.log("🚀 ~ DetailFilmScreen ~ data:", data);
+
+  const o = {
+    movieId,
+    date: "2025-01-10",
+    userLocation: {
+      coordinates: [longitude, latitude],
+      type: "Point",
+    },
+  };
+  // console.log("🚀 ~ DetailFilmScreen ~ o:", o);
+
+  // console.log("🚀 ~ DetailFilmScreen ~ data:", data);
+
   if (loading) {
     return (
       <Text className="w-full text-center my-auto text-3xl">Loading...</Text>
@@ -54,13 +88,7 @@ export default function DetailFilmScreen() {
       </Text>
     );
   }
-  console.log("🚀 ~ DetailFilmScreen ~ data", data);
-
-  // Parse the item data
-  const parsedItem = Array.isArray(item)
-    ? JSON.parse(item[0])
-    : JSON.parse(item);
-  console.log("🚀 ~ DetailFilmScreen ~ params:", parsedItem);
+  // console.log("🚀 ~ DetailFilmScreen ~ data", data);
 
   const toggleCinema = (cinema) => {
     if (cinema) {
@@ -81,7 +109,7 @@ export default function DetailFilmScreen() {
         {parsedItem.title}
       </Text>
       <Text className="text-lg mb-4">Title {parsedItem.title}</Text>
-      {console.log(parsedItem.movieStatus, "<<< ITEM")}
+      {/* {console.log(parsedItem.movieStatus, "<<< ITEM")} */}
       {parsedItem.movieStatus == "Now Showing" &&
         data.getShowTimes.map((showTime) => (
           <View key={showTime.cinema._id} className="mb-4">
@@ -96,7 +124,7 @@ export default function DetailFilmScreen() {
               <View className="border-2 border-gray-300 p-2 m-2 bg-slate-100">
                 <Text className="text-center">Cinema info</Text>
                 <Text className="text-center">
-                  Price: {toRupiah(showTime.showTimes[0].price)}
+                  Price: {toRupiah(showTime.showTimes[0]?.price || 0)}
                 </Text>
                 <View className="flex-row flex-wrap justify-center">
                   {showTime.showTimes.map((show) => (
@@ -106,7 +134,8 @@ export default function DetailFilmScreen() {
                           router.push({
                             pathname: "checkout",
                             params: {
-                              show: JSON.stringify(show),
+                              showTime: JSON.stringify(show),
+                              cinema: JSON.stringify(showTime.cinema),
                               movie: parsedItem.title,
                             },
                           })

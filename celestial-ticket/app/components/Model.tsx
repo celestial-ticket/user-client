@@ -17,7 +17,10 @@ type GLTFResult = GLTF & {
   };
 };
 
-export default function Model(props: JSX.IntrinsicElements["group"]) {
+export default function Model({
+  color,
+  ...props
+}: JSX.IntrinsicElements["group"] & { color: string }) {
   const { nodes, materials } = useGLTF(
     require("../../assets/model.glb")
   ) as GLTFResult;
@@ -38,10 +41,10 @@ export default function Model(props: JSX.IntrinsicElements["group"]) {
   const optimizedMaterial = useMemo(() => {
     const mat = materials.x1.clone();
     mat.roughness = 0.8; // Reduce reflections
-    mat.metalness = 0.1; // Simplify lighting response
-    mat.color.set("gray"); // Use a simpler base color
+    mat.metalness = 0.5; // Simplify lighting response
+    mat.color.set(color); // Use a simpler base color
     return mat;
-  }, [materials]);
+  }, [materials, color]);
 
   const geometryList = useMemo(
     () => [

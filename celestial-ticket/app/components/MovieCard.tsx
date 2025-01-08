@@ -15,7 +15,7 @@ export default function AllMovieCard({
         onPress={() =>
           router.push({
             pathname: "detail-film",
-            params: { movieId: item._id, item: JSON.stringify(item) },
+            params: { item: JSON.stringify(item) },
           })
         }
       >

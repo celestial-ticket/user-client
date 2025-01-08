@@ -116,6 +116,9 @@ export default function Page() {
 
   // ! <><><> [ RENDER MOVIE ] <><><>
   const { loading, error, data } = useQuery(GET_MOVIES);
+  const { nowShowing, upcoming, movies } = data || {};
+  // console.log("🚀 ~ data:", nowShowing);
+
   if (loading) {
     return (
       <Text className="w-full text-center my-auto text-3xl">Loading...</Text>
@@ -192,7 +195,7 @@ export default function Page() {
           <View>
             <Text className="m-5 font-bold text-xl">Now Showing</Text>
             <FlatList
-              data={data?.nowShowing}
+              data={nowShowing}
               renderItem={({ item }) => <Card item={item} />}
               keyExtractor={(item) => item._id}
               horizontal
@@ -210,7 +213,7 @@ export default function Page() {
           <View>
             <Text className="m-5 font-bold text-xl">Coming Soon</Text>
             <FlatList
-              data={data?.upcoming}
+              data={upcoming}
               renderItem={({ item }) => <Card item={item} />}
               keyExtractor={(item) => item._id}
               horizontal
@@ -228,7 +231,7 @@ export default function Page() {
           <View className="flex-1 mt-5 pb-24">
             <Text className="m-5 font-bold text-xl">All Movies</Text>
             <FlatList
-              data={data.movies}
+              data={movies}
               renderItem={({ item }) => (
                 <AllMovieCard
                   item={item}
