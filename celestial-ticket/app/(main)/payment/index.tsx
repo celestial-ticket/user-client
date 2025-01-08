@@ -67,7 +67,7 @@ export default function PaymentScreen() {
           source={{ uri: webViewUrl }}
           style={{ marginTop: 0, width: "100%", height: "80%" }}
           onNavigationStateChange={(event) => {
-            if (event.url.includes("finish")) {
+            if (event.url.includes("success")) {
               alert("Payment Successful");
               console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
               router.push({

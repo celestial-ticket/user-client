@@ -1,4 +1,5 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
@@ -24,7 +25,8 @@ export default function TabLayout() {
                 options={{
                     title: "Cinema",
                     tabBarIcon: ({ color }) => (
-                        <FontAwesome size={26} name="film" color={color} />
+                        <MaterialCommunityIcons name="office-building-marker-outline" size={24} color={color} />
+                        // <FontAwesome size={26} name="film" color={color} />
                     ),
                 }}
             />
