@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
-import { Text, TextInput, TouchableOpacity } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { useMutation } from '@apollo/client';
-import { registerMutation } from '../../../mutations/registration'; // pastikan mutation sudah diimpor dengan benar
-import { useRouter } from 'expo-router';
+import React, { useState } from "react";
+import { Alert, Text, TextInput, TouchableOpacity } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { useMutation } from "@apollo/client";
+import { registerMutation } from "../../../mutations/registration"; // pastikan mutation sudah diimpor dengan benar
+import { useRouter } from "expo-router";
+import * as SecureStorage from "expo-secure-store";
 
 export default function RegisterPage() {
+  const location = JSON.parse(SecureStorage.getItem("location"));
+  const { latitude, longitude } = location.coords;
   const [formData, setFormData] = useState({
-    name: '',
-    phoneNumber: '',
-    email: '',
-    password: '',
-    gender: '', // Asumsi gender juga ingin ditambahkan
-    address: '', // Menambahkan address
+    name: "",
+    phoneNumber: "",
+    email: "",
+    password: "",
+    gender: "", // Asumsi gender juga ingin ditambahkan
+    address: "", // Menambahkan address
+    location: { coordinates: [longitude, latitude], type: "Point" }, // Menambahkan lokasi pengguna
   });
 
   // Mutasi untuk registrasi
@@ -29,24 +33,25 @@ export default function RegisterPage() {
   const router = useRouter();
   // Menangani submit form
   const handleSubmit = async () => {
-    
     try {
       const { data } = await register({
         variables: {
           body: {
             ...formData,
-            
           },
         },
       });
-    
+
       console.log(formData);
-      router.replace('/login')
-      console.log('User registered:', data.register);
+      router.replace("login");
+      console.log("User registered:", data.register);
     } catch (err) {
-      console.error('Error registering user:', err);
+      console.error("Error registering user:", err);
     }
   };
+  if (error) {
+    Alert.alert("Register Failed", error.message);
+  }
 
   return (
     <SafeAreaProvider>
@@ -57,7 +62,7 @@ export default function RegisterPage() {
           placeholder="Name"
           placeholderTextColor="grey"
           value={formData.name}
-          onChangeText={(text) => handleChange('name', text)}
+          onChangeText={(text) => handleChange("name", text)}
         />
 
         {/* PHONE NUMBER */}
@@ -66,7 +71,7 @@ export default function RegisterPage() {
           placeholder="Phone Number"
           placeholderTextColor="grey"
           value={formData.phoneNumber}
-          onChangeText={(text) => handleChange('phoneNumber', text)}
+          onChangeText={(text) => handleChange("phoneNumber", text)}
         />
 
         {/* EMAIL */}
@@ -75,7 +80,7 @@ export default function RegisterPage() {
           placeholder="Email"
           placeholderTextColor="grey"
           value={formData.email}
-          onChangeText={(text) => handleChange('email', text)}
+          onChangeText={(text) => handleChange("email", text)}
         />
 
         {/* PASSWORD */}
@@ -85,7 +90,7 @@ export default function RegisterPage() {
           placeholderTextColor="grey"
           secureTextEntry={true}
           value={formData.password}
-          onChangeText={(text) => handleChange('password', text)}
+          onChangeText={(text) => handleChange("password", text)}
         />
 
         {/* GENDER (Pilih Gender) */}
@@ -94,7 +99,7 @@ export default function RegisterPage() {
           placeholder="Gender"
           placeholderTextColor="grey"
           value={formData.gender}
-          onChangeText={(text) => handleChange('gender', text)}
+          onChangeText={(text) => handleChange("gender", text)}
         />
 
         {/* ADDRESS */}
@@ -103,7 +108,7 @@ export default function RegisterPage() {
           placeholder="Address"
           placeholderTextColor="grey"
           value={formData.address}
-          onChangeText={(text) => handleChange('address', text)}
+          onChangeText={(text) => handleChange("address", text)}
         />
 
         {/* REGISTER BUTTON */}
@@ -113,12 +118,12 @@ export default function RegisterPage() {
           disabled={loading}
         >
           <Text className="text-center font-bold color-black">
-            {loading ? 'Registering...' : 'Sign Up'}
+            {loading ? "Registering..." : "Sign Up"}
           </Text>
         </TouchableOpacity>
 
-        {/* ERROR HANDLING */}
-        {error && <Text className="text-red-500">{error.message}</Text>}
+        {/* ERROR HANDLING
+        {error && <Text className="text-red-500">{error.message}</Text>} */}
       </SafeAreaView>
     </SafeAreaProvider>
   );

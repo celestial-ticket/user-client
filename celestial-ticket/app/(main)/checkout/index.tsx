@@ -8,6 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { toRupiah } from "../../../helpers/toRupiah";
+import * as SecureStore from "expo-secure-store";
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -16,8 +17,8 @@ export default function CheckoutScreen() {
   const parsedShow = Array.isArray(show)
     ? JSON.parse(show[0])
     : JSON.parse(show);
-    console.log("🚀 ~ CheckoutScreen ~ parsedShow", parsedShow);
-    
+  console.log("🚀 ~ CheckoutScreen ~ parsedShow", parsedShow);
+
   const { time, seatList: seats, price } = parsedShow;
 
   //   const memoSeats = useMemo(() => seats, [seats]);
@@ -62,6 +63,10 @@ export default function CheckoutScreen() {
   };
 
   useEffect(() => {
+    const accessToken = SecureStore.getItem("accessToken");
+    if (!accessToken) {
+      router.replace("login");
+    }
     const arrangedSeats = arrangeSeats(seats);
     setSeatsData(arrangedSeats);
   }, []);
@@ -116,7 +121,11 @@ export default function CheckoutScreen() {
           <TouchableOpacity
             key={seat}
             className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
-              status === "available" ? "bg-green-500" : status === "booked" ? "bg-blue-500": "bg-red-500"
+              status === "available"
+                ? "bg-green-500"
+                : status === "booked"
+                ? "bg-blue-500"
+                : "bg-red-500"
             }`}
             onPress={() => toggleSeatStatus(rowIndex, "middle", index)}
             disabled={status === "unavailable"}

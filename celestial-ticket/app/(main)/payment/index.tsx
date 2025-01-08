@@ -71,7 +71,7 @@ export default function PaymentScreen() {
               alert("Payment Successful");
               console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
               router.replace({
-                pathname: "/order-detail",
+                pathname: "order-detail",
                 params: {
                   totalPrice,
                   bookedSeats: JSON.stringify(bookedSeats),

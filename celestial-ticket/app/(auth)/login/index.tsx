@@ -51,14 +51,13 @@ export default function LoginPage() {
       await save("user", JSON.stringify(user)); // Save user data if needed
 
       // Navigate to the next page after successful login
-      router.push('(tabs)'); // Replace with the path of the page after login
+      router.replace("/(tabs)"); // Replace with the path of the page after login
 
       // Provide feedback that login was successful
       Alert.alert("Login Successful", "You have successfully logged in.");
-      
     } catch (err) {
       console.error("Error logging in:", err);
-      Alert.alert("Login Failed", "An error occurred during login.");
+      Alert.alert("Login Failed", err.message);
     }
   };
 
