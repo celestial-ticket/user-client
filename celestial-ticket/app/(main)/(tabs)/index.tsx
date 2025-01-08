@@ -27,6 +27,7 @@ import AllMovieCard from "../../components/MovieCard";
 import { useQuery } from "@apollo/client";
 import { GET_MOVIES } from "../../../mutations/movie";
 import Card from "../../components/CarouselMovie";
+import { useMovies } from "../../../contexts/MoviesContext";
 
 export default function Page() {
   // ! Location
@@ -115,7 +116,8 @@ export default function Page() {
   ];
 
   // ! <><><> [ RENDER MOVIE ] <><><>
-  const { loading, error, data } = useQuery(GET_MOVIES);
+  const { data, loading, error } = useMovies();
+
   const { nowShowing, upcoming, movies } = data || {};
   // console.log("🚀 ~ data:", nowShowing);
 

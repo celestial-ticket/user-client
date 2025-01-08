@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { toRupiah } from "../../../helpers/toRupiah";
 import * as SecureStore from "expo-secure-store";
+import { GET_ORDERS_CHAIR } from "../../../mutations/order";
+import { useQuery } from "@apollo/client";
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -21,7 +23,11 @@ export default function CheckoutScreen() {
     : JSON.parse(show);
   // console.log("🚀 ~ CheckoutScreen ~ parsedShow", parsedShow);
 
-  const { time, seatList: seats, price } = parsedShow;
+  const { time, seatList: seats, price, _id: showTimeId } = parsedShow;
+  // console.log("🚀 ~ CheckoutScreen ~ showTimeId:", showTimeId);
+
+  //get all orders
+  const { loading, error, data, refetch } = useQuery(GET_ORDERS_CHAIR);
 
   //   const memoSeats = useMemo(() => seats, [seats]);
   const [seatsData, setSeatsData] = useState([]);
@@ -69,7 +75,24 @@ export default function CheckoutScreen() {
     if (!accessToken) {
       router.replace("login");
     }
-    const arrangedSeats = arrangeSeats(seats);
+    const unavailableSeats = data.getOrders
+      .filter(
+        (order) => order.showTime._id.toString() === showTimeId.toString()
+      )
+      .map((order) => order.seats)
+      .flat();
+
+    // console.log("🚀 ~ useEffect ~ unavailableSeats:", unavailableSeats);
+
+    const updatedSeats = seats.map(([seat, status]) => {
+      if (unavailableSeats.includes(seat)) {
+        return [seat, "unavailable"];
+      }
+      return [seat, status];
+    });
+    // console.log("🚀 ~ updatedSeats ~ updatedSeats:", updatedSeats);
+
+    const arrangedSeats = arrangeSeats(updatedSeats);
     setSeatsData(arrangedSeats);
   }, []);
 
@@ -80,6 +103,7 @@ export default function CheckoutScreen() {
     if (booked.length === 0) {
       setModalVisible(false);
     }
+    refetch();
   }, [seatsData]);
 
   const toggleSeatStatus = (
@@ -89,7 +113,7 @@ export default function CheckoutScreen() {
   ) => {
     const updatedSeats = [...seatsData];
     const seat = updatedSeats[rowIndex][section][seatIndex];
-    console.log("🚀 ~ CheckoutScreen ~ seat:", seat);
+    // console.log("🚀 ~ CheckoutScreen ~ seat:", seat);
     seat[1] = seat[1] === "booked" ? "available" : "booked";
     setSeatsData(updatedSeats);
     // console.log("🚀 ~ CheckoutScreen ~ seatData:", seatsData[0].middle);
@@ -165,6 +189,14 @@ export default function CheckoutScreen() {
     </View>
   );
 
+  if (loading)
+    return <Text className="h-screen my-auto text-center">Loading...</Text>;
+  if (error)
+    return (
+      <Text className="h-screen my-auto text-center">
+        Error: {error.message}
+      </Text>
+    );
   return (
     <View className="flex-1 p-4 bg-white">
       <Text className="text-2xl font-bold mb-4">{movie}</Text>

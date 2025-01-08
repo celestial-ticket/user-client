@@ -30,7 +30,7 @@ export default function ProfileScreen() {
           },
         });
       } else {
-        router.replace("login"); // Arahkan ke halaman login jika belum login
+        router.push("login"); // Arahkan ke halaman login jika belum login
       }
     };
 
@@ -48,7 +48,7 @@ export default function ProfileScreen() {
       setUser(null);
 
       // Navigasi ke halaman login
-      router.replace("login");
+      router.replace("(main)");
     } catch (error) {
       console.error("Error during logout:", error);
     }

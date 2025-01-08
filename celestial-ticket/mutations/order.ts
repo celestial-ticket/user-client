@@ -23,3 +23,14 @@ export const CreateOrder = gql`
     }
   }
 `;
+
+export const GET_ORDERS_CHAIR = gql`
+  query GetOrders {
+    getOrders {
+      showTime {
+        _id
+      }
+      seats
+    }
+  }
+`;

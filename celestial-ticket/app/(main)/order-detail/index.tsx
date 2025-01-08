@@ -16,10 +16,11 @@ export default function OrderDetailScreen() {
   const { bookedSeats, totalPrice, movie, showTime, cinema } = params;
   // console.log("🚀 ~ OrderDetailScreen ~ params:", params);
 
-  const arrayBookedSeats = Array.isArray(bookedSeats)
-    ? (JSON.parse(bookedSeats[0]) as [])
-    : (JSON.parse(bookedSeats) as []);
+  const parsedBookedSeats = Array.isArray(bookedSeats)
+    ? JSON.parse(bookedSeats[0])
+    : JSON.parse(bookedSeats);
   // console.log("🚀 ~ arrayBookedSeats:", arrayBookedSeats);
+  const arrayBookedSeats = JSON.parse(parsedBookedSeats);
 
   const parsedCinema = Array.isArray(cinema)
     ? JSON.parse(cinema[0])
@@ -67,7 +68,7 @@ export default function OrderDetailScreen() {
       <Text>{movie}</Text>
       <Text>{Date(parsedShowTime.date)}</Text>
       <Text>{cinemaObejct.name}</Text>
-      <Text>{arrayBookedSeats}</Text>
+      <Text>{arrayBookedSeats.join(", ")}</Text>
       <Text>{totalPrice}</Text>
       <Text>{Date(order.createdAt)}</Text>
       <Text>{order.paymentStatus}</Text>
