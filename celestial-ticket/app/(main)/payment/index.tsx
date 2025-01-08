@@ -10,7 +10,7 @@ import { toRupiah } from "../../../helpers/toRupiah";
 export default function PaymentScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { totalPrice, bookedSeats, movie } = params;
+  const { totalPrice, bookedSeats, movie, showTime, cinema } = params;
 
   const arrayBookedSeats: [] = Array.isArray(bookedSeats)
     ? JSON.parse(bookedSeats[0])
@@ -76,6 +76,8 @@ export default function PaymentScreen() {
                   totalPrice,
                   bookedSeats: JSON.stringify(bookedSeats),
                   movie,
+                  showTime,
+                  cinema,
                 },
               }); // Navigate to order-detail screen
             } else if (event.url.includes("error")) {

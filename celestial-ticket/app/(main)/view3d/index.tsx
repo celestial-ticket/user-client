@@ -8,6 +8,7 @@ import Model from "../../components/Model";
 import TextModel from "../../components/TextModel";
 import CustomTextModel from "../../components/CustomTextModel";
 import AngelModel from "../../components/AngelModel";
+import { Sky } from "@react-three/drei/native";
 
 extend({ PlaneGeometry });
 
@@ -84,15 +85,16 @@ export default function View3D() {
           }}
           shadows
         >
-          <OrbitControls />
-          <ambientLight intensity={0.3} />
-          <directionalLight color="red" intensity={2} position={[0, 10, 5]} />
-          <directionalLight
+          {/* <Sky sunPosition={[100, 20, 100]} /> */}
+          <ambientLight intensity={0.5} />
+          {/* <directionalLight color="red" intensity={2} position={[0, 10, 5]} /> */}
+          {/* <directionalLight
             color="white"
             intensity={0.8}
             position={[2, 0, -4]}
-          />
-
+          /> */}
+          <directionalLight position={[0, 10, 5]} intensity={1} />
+          <OrbitControls />
           <Suspense
             fallback={
               <CustomTextModel
@@ -121,13 +123,13 @@ export default function View3D() {
               return (
                 <group key={index} position={pos}>
                   {/* Cinema Seat */}
-                  <Model />
+                  <Model color={status === "booked" ? "blue" : "red"} />
                   {/* Angel Model */}
-                  {status === "Booked" && (
+                  {status === "booked" && (
                     <AngelModel position={[-0.02, 0.8, 0.2]} />
                   )}
                   {/* seat number */}
-                  {status !== "Booked" && (
+                  {status !== "booked" && (
                     <CustomTextModel
                       meshProps={{
                         position: [
@@ -149,13 +151,13 @@ export default function View3D() {
             {/* Cinema Screen */}
             <mesh position={[10, 5, 7]}>
               <planeGeometry args={[25, 10]} />
-              <meshStandardMaterial color="white" side={DoubleSide} />
+              <meshStandardMaterial color="#87CEF3" side={DoubleSide} />
             </mesh>
 
             {/* Floor */}
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[10, 0, -2]}>
+            <mesh rotation={[-Math.PI / 2, -0.1, 0]} position={[10, 0, -2]}>
               <planeGeometry args={[35, 20]} />
-              <meshBasicMaterial color="#3d3d3d" />
+              <meshBasicMaterial color="#87CEE3" side={DoubleSide} />
             </mesh>
 
             {/* Text Spotlight */}
@@ -170,7 +172,7 @@ export default function View3D() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#87CEEB",
     alignItems: "center",
     justifyContent: "center",
   },

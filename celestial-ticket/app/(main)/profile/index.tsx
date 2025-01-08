@@ -13,7 +13,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     const fetchUser = async () => {
       const userToken = await SecureStore.getItemAsync("accessToken");
-      console.log("🚀 ~ fetchUser ~ userToken:", userToken)
+      console.log("🚀 ~ fetchUser ~ userToken:", userToken);
 
       if (userToken) {
         // Contoh data pengguna, ubah sesuai kebutuhan
@@ -40,7 +40,9 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     try {
       // Hapus data sesi yang disimpan di SecureStore
-      await SecureStore.deleteItemAsync("userToken");
+      await SecureStore.deleteItemAsync("user");
+      await SecureStore.deleteItemAsync("location");
+      await SecureStore.deleteItemAsync("accessToken");
 
       // Reset status pengguna
       setUser(null);
