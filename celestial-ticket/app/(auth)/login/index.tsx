@@ -76,8 +76,9 @@ export default function LoginPage() {
         style={{ flex: 1 }}
       >
         <SafeAreaView className="flex justify-center items-center h-full">
-          <View className="mb-10">
-            <Text className="text-6xl font-extrabold text-white">CelTix</Text>
+          <View className="flex flex-row mb-10">
+            <Text className="text-6xl font-extrabold">Cel-</Text>
+            <Text className="text-6xl font-extrabold text-[#f4c366]">Tix</Text>
           </View>
           <View className="m-8">
             {/* EMAIL */}
@@ -99,24 +100,24 @@ export default function LoginPage() {
             />
             {/* LOGIN BUTTON */}
             <TouchableOpacity
-              className="bg-blue-500 w-96 h-14 rounded-2xl mb-3 flex justify-center shadow-md hover:bg-blue-600 transition duration-200"
+              className="bg-[#f4c366] w-96 h-14 rounded-2xl mb-3 flex justify-center shadow-md hover:bg-blue-600 transition duration-200"
               onPress={handleSubmit}
               disabled={loading}
             >
-              <Text className="text-center font-bold text-white">
+              <Text className="text-center font-bold text-black">
                 {loading ? "Logging In..." : "Log In"}
               </Text>
             </TouchableOpacity>
 
             {/* CREATE AN ACCOUNT BUTTON */}
             <TouchableOpacity
-              className="w-96 h-14 border-2 rounded-2xl flex justify-center border-blue-500 hover:bg-blue-500 transition duration-200"
+              className="w-96 h-14 border-2 rounded-2xl flex justify-center border-[#f4c366] hover:bg-blue-500 transition duration-200"
               onPress={() => {
                 console.log("Create Account");
                 router.push("register"); // Navigate to the register page
               }}
             >
-              <Text className="text-center font-bold text-blue-500">
+              <Text className="text-center font-bold text-black">
                 Create an account
               </Text>
             </TouchableOpacity>

@@ -7,7 +7,7 @@ export default function TabLayout() {
         <Tabs
             screenOptions={{
                 lazy: false,
-                tabBarActiveTintColor: "blue",
+                tabBarActiveTintColor: "#04243a",
                 headerShown: false,
             }}
         >
@@ -25,7 +25,7 @@ export default function TabLayout() {
                 options={{
                     title: "Cinema",
                     tabBarIcon: ({ color }) => (
-                        <MaterialCommunityIcons name="office-building-marker-outline" size={24} color={color} />
+                        <MaterialCommunityIcons name="office-building-marker-outline" size={26} color={color} />
                         // <FontAwesome size={26} name="film" color={color} />
                     ),
                 }}
