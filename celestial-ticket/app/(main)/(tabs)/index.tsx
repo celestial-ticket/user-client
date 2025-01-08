@@ -149,7 +149,7 @@ export default function Page() {
       </View>
       {/* ----------------- */}
 
-      <ScrollView style={{ backgroundColor: "white" }}>
+      <ScrollView className="bg-white">
         <View>
           {/* LOCATION */}
           <View className="flex flex-row m-5">
