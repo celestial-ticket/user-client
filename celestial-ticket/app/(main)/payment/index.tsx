@@ -10,7 +10,7 @@ import { toRupiah } from "../../../helpers/toRupiah";
 export default function PaymentScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { totalPrice, bookedSeats, movie } = params;
+  const { totalPrice, bookedSeats, movie, showTime, cinema } = params;
 
   const arrayBookedSeats: [] = Array.isArray(bookedSeats)
     ? JSON.parse(bookedSeats[0])
@@ -67,15 +67,17 @@ export default function PaymentScreen() {
           source={{ uri: webViewUrl }}
           style={{ marginTop: 0, width: "100%", height: "80%" }}
           onNavigationStateChange={(event) => {
-            if (event.url.includes("finish")) {
+            if (event.url.includes("success")) {
               alert("Payment Successful");
               console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
-              router.push({
-                pathname: "/order-detail",
+              router.replace({
+                pathname: "order-detail",
                 params: {
                   totalPrice,
                   bookedSeats: JSON.stringify(bookedSeats),
                   movie,
+                  showTime,
+                  cinema,
                 },
               }); // Navigate to order-detail screen
             } else if (event.url.includes("error")) {

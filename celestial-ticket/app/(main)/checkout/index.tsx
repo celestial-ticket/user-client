@@ -8,16 +8,19 @@ import {
   Pressable,
 } from "react-native";
 import { toRupiah } from "../../../helpers/toRupiah";
+import * as SecureStore from "expo-secure-store";
 
 export default function CheckoutScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { show, movie } = params;
+  const { showTime: show, cinema, movie } = params;
+  // console.log("🚀 ~ CheckoutScreen ~ cinema:", cinema);
+
   const parsedShow = Array.isArray(show)
     ? JSON.parse(show[0])
     : JSON.parse(show);
-    console.log("🚀 ~ CheckoutScreen ~ parsedShow", parsedShow);
-    
+  // console.log("🚀 ~ CheckoutScreen ~ parsedShow", parsedShow);
+
   const { time, seatList: seats, price } = parsedShow;
 
   //   const memoSeats = useMemo(() => seats, [seats]);
@@ -62,6 +65,10 @@ export default function CheckoutScreen() {
   };
 
   useEffect(() => {
+    const accessToken = SecureStore.getItem("accessToken");
+    if (!accessToken) {
+      router.replace("login");
+    }
     const arrangedSeats = arrangeSeats(seats);
     setSeatsData(arrangedSeats);
   }, []);
@@ -82,8 +89,10 @@ export default function CheckoutScreen() {
   ) => {
     const updatedSeats = [...seatsData];
     const seat = updatedSeats[rowIndex][section][seatIndex];
+    console.log("🚀 ~ CheckoutScreen ~ seat:", seat);
     seat[1] = seat[1] === "booked" ? "available" : "booked";
     setSeatsData(updatedSeats);
+    // console.log("🚀 ~ CheckoutScreen ~ seatData:", seatsData[0].middle);
     setModalVisible(true);
   };
 
@@ -102,8 +111,13 @@ export default function CheckoutScreen() {
           <TouchableOpacity
             key={seat}
             className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
-              status === "available" ? "bg-green-500" : "bg-red-500"
+              status === "available"
+                ? "bg-green-500"
+                : status === "booked"
+                ? "bg-yellow-500"
+                : "bg-red-500"
             }`}
+            disabled={status === "unavailable"}
             onPress={() => toggleSeatStatus(rowIndex, "left", index)}
           >
             <Text className="text-white font-bold">{seat}</Text>
@@ -116,10 +130,14 @@ export default function CheckoutScreen() {
           <TouchableOpacity
             key={seat}
             className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
-              status === "available" ? "bg-green-500" : status === "booked" ? "bg-blue-500": "bg-red-500"
+              status === "available"
+                ? "bg-green-500"
+                : status === "booked"
+                ? "bg-yellow-500"
+                : "bg-red-500"
             }`}
-            onPress={() => toggleSeatStatus(rowIndex, "middle", index)}
             disabled={status === "unavailable"}
+            onPress={() => toggleSeatStatus(rowIndex, "middle", index)}
           >
             <Text className="text-white font-bold">{seat}</Text>
           </TouchableOpacity>
@@ -131,8 +149,13 @@ export default function CheckoutScreen() {
           <TouchableOpacity
             key={seat}
             className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
-              status === "available" ? "bg-green-500" : "bg-red-500"
+              status === "available"
+                ? "bg-green-500"
+                : status === "booked"
+                ? "bg-yellow-500"
+                : "bg-red-500"
             }`}
+            disabled={status === "unavailable"}
             onPress={() => toggleSeatStatus(rowIndex, "right", index)}
           >
             <Text className="text-white font-bold">{seat}</Text>
@@ -206,6 +229,8 @@ export default function CheckoutScreen() {
                 totalPrice,
                 bookedSeats: JSON.stringify(bookedSeats),
                 movie,
+                showTime: show,
+                cinema: JSON.stringify(cinema),
               },
             })
           }

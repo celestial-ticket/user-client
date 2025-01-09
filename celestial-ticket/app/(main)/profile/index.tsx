@@ -12,9 +12,9 @@ export default function ProfileScreen() {
   // Ambil data pengguna dari SecureStore
   useEffect(() => {
     const fetchUser = async () => {
-      const userToken = await SecureStore.getItemAsync("userToken");
-      console.log(userToken);
-      
+      const userToken = await SecureStore.getItemAsync("accessToken");
+      console.log("🚀 ~ fetchUser ~ userToken:", userToken);
+
       if (userToken) {
         // Contoh data pengguna, ubah sesuai kebutuhan
         setUser({
@@ -30,7 +30,7 @@ export default function ProfileScreen() {
           },
         });
       } else {
-        router.push("login"); // Arahkan ke halaman login jika belum login
+        router.replace("login"); // Arahkan ke halaman login jika belum login
       }
     };
 
@@ -40,13 +40,15 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     try {
       // Hapus data sesi yang disimpan di SecureStore
-      await SecureStore.deleteItemAsync("userToken");
+      await SecureStore.deleteItemAsync("user");
+      await SecureStore.deleteItemAsync("location");
+      await SecureStore.deleteItemAsync("accessToken");
 
       // Reset status pengguna
       setUser(null);
 
       // Navigasi ke halaman login
-      router.push("login");
+      router.replace("login");
     } catch (error) {
       console.error("Error during logout:", error);
     }
