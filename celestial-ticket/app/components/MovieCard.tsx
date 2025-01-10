@@ -2,6 +2,22 @@ import { router } from "expo-router";
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 
+type MovieCardProps = {
+  width: any;
+
+  item: any;
+
+  title: any;
+
+  poster: any;
+
+  ageRating: any;
+
+  genre: any;
+
+  onPress?: () => void;
+};
+
 export default function AllMovieCard({
   width,
   item,
@@ -9,11 +25,11 @@ export default function AllMovieCard({
   poster,
   ageRating,
   genre,
-}) {
+}: MovieCardProps) {
   console.log(item, "item");
 
   return (
-    <View className={`bg-white rounded-lg shadow-md  ${width ? "" : "w-44"}`}>
+    <View className={`rounded-lg bg-white shadow-md ${width ? "" : "w-44"}`}>
       <TouchableOpacity
         onPress={() =>
           router.push({
@@ -22,9 +38,9 @@ export default function AllMovieCard({
           })
         }
       >
-        <Image source={{ uri: poster }} className="w-full h-64 rounded-lg" />
-        <Text className="font-bold text-lg p-2 mt-2">{title}</Text>
-        <View className="flex flex-row p-2 mt-2">
+        <Image source={{ uri: poster }} className="h-64 w-full rounded-lg" />
+        <Text className="mt-2 p-2 text-lg font-bold">{title}</Text>
+        <View className="mt-2 flex flex-row p-2">
           <Text className="pr-1">{ageRating}</Text>
           <Text className="">{genre}</Text>
         </View>

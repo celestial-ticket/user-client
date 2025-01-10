@@ -1,15 +1,14 @@
 import { useLocalSearchParams } from "expo-router";
-import { View, StyleSheet, Text, Modal } from "react-native";
-import { Suspense } from "react";
+import { View, StyleSheet, Text, Modal, ActivityIndicator } from "react-native";
+import { Suspense, useState, useEffect } from "react";
 import { Canvas, extend } from "@react-three/fiber";
 import useControls from "r3f-native-orbitcontrols";
 import { PlaneGeometry, DoubleSide } from "three";
-import Model from "../../components/Model";
+import * as THREE from "three";
+import Model from "../../components/SeatModel";
 import TextModel from "../../components/TextModel";
 import CustomTextModel from "../../components/CustomTextModel";
 import AngelModel from "../../components/AngelModel";
-import { Sky } from "@react-three/drei/native";
-
 extend({ PlaneGeometry });
 
 const createRowPositions = (rows: number, columns: number, xOffset: number) => {
@@ -30,6 +29,15 @@ export default function View3D() {
   const params = useLocalSearchParams();
   const { seats } = params;
   console.log("🚀 ~ View3D ~ seats:", seats);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const parsedSeats = Array.isArray(seats)
     ? JSON.parse(seats[0])
@@ -55,7 +63,7 @@ export default function View3D() {
       acc[seat] = status;
       return acc;
     },
-    {}
+    {},
   );
 
   const seatCodes = "EDCBA";
@@ -70,10 +78,15 @@ export default function View3D() {
   const [OrbitControls, events] = useControls();
 
   const allPositions = sections.flatMap((section) =>
-    createRowPositions(rows, section.columns, section.xOffset)
+    createRowPositions(rows, section.columns, section.xOffset),
   );
   return (
     <View style={styles.container}>
+      {isLoading && (
+        <View className="absolute flex items-center justify-center">
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      )}
       <Text style={styles.text}>3D Cinema Viewer</Text>
       <View style={styles.canvas} {...events}>
         <Canvas
@@ -95,74 +108,64 @@ export default function View3D() {
           /> */}
           <directionalLight position={[0, 10, 5]} intensity={1} />
           <OrbitControls />
-          <Suspense
-            fallback={
-              <CustomTextModel
-                meshProps={{
-                  position: [0, 0, 0],
-                  scale: [0.1, 0.1, 0.1],
-                  rotation: [0, 0, 0],
-                }}
-                text="Loading..."
-                color="white"
-              />
-            }
-          >
-            {/* Cinema Seats */}
-            {allPositions.map((pos, index) => {
-              const [colIndex, rowIndex] = pos;
-              const seatCode = seatCodes[rowIndex / 0.5];
-              if (seatNumbers[seatCode] === undefined) {
-                seatNumbers[seatCode] = 1;
-              } else {
-                seatNumbers[seatCode]++;
-              }
-              const seatPosition = `${seatCode}${seatNumbers[seatCode]}`;
-              const status = seatStatus[seatPosition] || "Available";
+          {!isLoading && (
+            <Suspense fallback={null}>
+              {/* Cinema Seats */}
+              {allPositions.map((pos, index) => {
+                const [colIndex, rowIndex] = pos;
+                const seatCode = seatCodes[rowIndex / 0.5];
+                if (seatNumbers[seatCode] === undefined) {
+                  seatNumbers[seatCode] = 1;
+                } else {
+                  seatNumbers[seatCode]++;
+                }
+                const seatPosition = `${seatCode}${seatNumbers[seatCode]}`;
+                const status = seatStatus[seatPosition] || "Available";
 
-              return (
-                <group key={index} position={pos}>
-                  {/* Cinema Seat */}
-                  <Model color={status === "booked" ? "blue" : "red"} />
-                  {/* Angel Model */}
-                  {status === "booked" && (
-                    <AngelModel position={[-0.02, 0.8, 0.2]} />
-                  )}
-                  {/* seat number */}
-                  {status !== "booked" && (
-                    <CustomTextModel
-                      meshProps={{
-                        position: [
-                          seatNumbers[seatCode] < 10 ? -0.33 : -0.4,
-                          0.9,
-                          0.4,
-                        ],
-                        scale: [0.004, 0.004, 0.004],
-                        rotation: [-Math.PI / 2, 0, 0],
-                      }}
-                      text={seatPosition}
-                      color={status === "available" ? "white" : "black"}
-                    />
-                  )}
-                </group>
-              );
-            })}
+                return (
+                  <group key={index} position={pos}>
+                    {/* Cinema Seat */}
+                    <Model color={status === "booked" ? "blue" : "red"} />
+                    {/* Angel Model */}
+                    {status === "booked" && (
+                      <AngelModel position={[-0.02, 0.8, 0.2]} />
+                    )}
+                    {/* seat number */}
+                    {status !== "booked" && (
+                      <CustomTextModel
+                        meshProps={{
+                          position: [
+                            seatNumbers[seatCode] < 10 ? -0.33 : -0.4,
+                            0.9,
+                            0.4,
+                          ],
+                          scale: [0.004, 0.004, 0.004],
+                          rotation: [-Math.PI / 2, 0, 0],
+                        }}
+                        text={seatPosition}
+                        color={status === "available" ? "white" : "black"}
+                      />
+                    )}
+                  </group>
+                );
+              })}
 
-            {/* Cinema Screen */}
-            <mesh position={[10, 5, 7]}>
-              <planeGeometry args={[25, 10]} />
-              <meshStandardMaterial color="#87CEF3" side={DoubleSide} />
-            </mesh>
+              {/* Cinema Screen */}
+              <mesh position={[10, 4.8, 7]}>
+                <planeGeometry args={[25, 10]} />
+                <meshStandardMaterial color="#87CEF3" side={DoubleSide} />
+              </mesh>
 
-            {/* Floor */}
-            <mesh rotation={[-Math.PI / 2, -0.1, 0]} position={[10, 0, -2]}>
-              <planeGeometry args={[35, 20]} />
-              <meshBasicMaterial color="#87CEE3" side={DoubleSide} />
-            </mesh>
+              {/* Floor */}
+              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[10, -0.2, -2]}>
+                <planeGeometry args={[35, 20]} />
+                <meshBasicMaterial color="#87CEE3" side={DoubleSide} />
+              </mesh>
 
-            {/* Text Spotlight */}
-            <TextModel position={[19, 4.5, 6.7]} />
-          </Suspense>
+              {/* Text Spotlight */}
+              <TextModel position={[19, 4.5, 6.7]} />
+            </Suspense>
+          )}
         </Canvas>
       </View>
     </View>

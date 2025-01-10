@@ -20,7 +20,7 @@ const transformCinemaData = (cinemas, nowShowing) => {
     const movies = cinema.showTimes
       .map((showTime) => {
         const movie = nowShowing.find(
-          (movie) => movie._id === showTime.movieId
+          (movie) => movie._id === showTime.movieId,
         );
         return movie
           ? {
@@ -63,7 +63,7 @@ export default function CinemaScreen() {
         let currentLocation = await Location.getCurrentPositionAsync({});
         await SecureStore.setItemAsync(
           "location",
-          JSON.stringify(currentLocation)
+          JSON.stringify(currentLocation),
         );
         setLocation(currentLocation);
       }
@@ -97,14 +97,14 @@ export default function CinemaScreen() {
 
   if (moviesLoading || loading)
     return (
-      <View className="h-screen my-auto justify-center items-center">
-        <ActivityIndicator size={"100"} color="#0000ff" />
+      <View className="my-auto h-screen items-center justify-center">
+        <ActivityIndicator size={"large"} color="#0000ff" />
       </View>
     );
 
   if (moviesError || error)
     return (
-      <Text className="h-screen my-auto text-center">
+      <Text className="my-auto h-screen text-center">
         {moviesError ? moviesError.message : error.message}
       </Text>
     );
@@ -112,7 +112,7 @@ export default function CinemaScreen() {
   const { nowShowing } = movieData;
   const transformedData = transformCinemaData(
     data?.getNearbyCinemas,
-    nowShowing
+    nowShowing,
   );
 
   const toggleCinema = (cinemaId) => {
@@ -121,11 +121,11 @@ export default function CinemaScreen() {
 
   return (
     <ScrollView className="flex-1">
-      <Text className="text-3xl font-bold text-center mt-5 mb-5 under">
+      <Text className="under mb-5 mt-5 text-center text-3xl font-bold">
         Nearby Cinema
       </Text>
       {transformedData.map((cinema, index) => (
-        <View key={index} className="border-b w-full p-3 border-gray-300">
+        <View key={index} className="w-full border-b border-gray-300 p-3">
           <TouchableOpacity onPress={() => toggleCinema(cinema._id)}>
             <View className="flex flex-row">
               <MaterialCommunityIcons
@@ -134,7 +134,7 @@ export default function CinemaScreen() {
                 size={30}
                 color="black"
               />
-              <Text className="font-semibold text-xl">{cinema.name}</Text>
+              <Text className="text-xl font-semibold">{cinema.name}</Text>
             </View>
           </TouchableOpacity>
           {expandedCinema === cinema._id && (

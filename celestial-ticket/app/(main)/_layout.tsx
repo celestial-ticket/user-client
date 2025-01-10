@@ -5,8 +5,8 @@ import { MoviesProvider } from "../../contexts/MoviesContext";
 
 export default function Layout() {
   return (
-    <MovieProvider>
-      <MoviesProvider>
+    <MoviesProvider>
+      <MovieProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="profile" />
@@ -16,7 +16,7 @@ export default function Layout() {
           <Stack.Screen name="detail-film" />
           <Stack.Screen name="order-detail" />
         </Stack>
-      </MoviesProvider>
-    </MovieProvider>
+      </MovieProvider>
+    </MoviesProvider>
   );
 }

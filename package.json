@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "react-native-qrcode-svg": "^6.3.12"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9"
   }
 }

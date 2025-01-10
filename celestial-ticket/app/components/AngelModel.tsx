@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import React, { useRef } from "react";
 import { useGLTF } from "@react-three/drei";
 import { GLTF } from "three-stdlib";
 
@@ -14,7 +13,7 @@ type GLTFResult = GLTF & {
 
 export default function AngelModel(props: JSX.IntrinsicElements["group"]) {
   const { nodes, materials } = useGLTF(
-    require("../../assets/angel.glb")
+    require("../../assets/angel.glb"),
   ) as GLTFResult;
   return (
     <group {...props} dispose={null} scale={0.006} rotation={[0, -0.8, 0]}>

@@ -32,7 +32,7 @@ import { useMovies } from "../../../contexts/MoviesContext";
 export default function Page() {
   // ! Location
   const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
+    null,
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [city, setCity] = useState("");
@@ -128,14 +128,14 @@ export default function Page() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center absolute">
+      <View className="flex h-screen items-center justify-center">
         <ActivityIndicator size={100} />
       </View>
     );
   }
   if (error) {
     return (
-      <Text className="mx-auto my-auto text-3xl bg-red-600">
+      <Text className="mx-auto my-auto bg-red-600 text-3xl">
         Error: {error.message}
       </Text>
     );
@@ -144,9 +144,9 @@ export default function Page() {
   return (
     <SafeAreaView className="bg-white">
       {/* SEARCH BAR */}
-      <View className="flex flex-row justify-center items-center mt-5 mb-3">
-        <View className="flex flex-row justify-center items-center w-5/6 bg-gray-100 rounded-full mr-3">
-          <View className="w-1/6 justify-center items-center">
+      <View className="mb-3 mt-5 flex flex-row items-center justify-center">
+        <View className="mr-3 flex w-5/6 flex-row items-center justify-center rounded-full bg-gray-100">
+          <View className="w-1/6 items-center justify-center">
             <Feather name="search" size={24} color="black" />
             {/* <Image className="w-6 h-6" /> */}
           </View>
@@ -161,7 +161,7 @@ export default function Page() {
       <ScrollView className="bg-white">
         <View>
           {/* LOCATION */}
-          <View className="flex flex-row m-5">
+          <View className="m-5 flex flex-row">
             <FontAwesome
               className="mr-3"
               name="map-marker"
@@ -203,7 +203,7 @@ export default function Page() {
 
           {/* CARD NOW SHOWING */}
           <View>
-            <Text className="m-5 font-bold text-xl">Now Showing</Text>
+            <Text className="m-5 text-xl font-bold">Now Showing</Text>
             <FlatList
               data={nowShowing}
               renderItem={({ item }) => <Card item={item} />}
@@ -227,7 +227,7 @@ export default function Page() {
 
           {/* UPCOMING */}
           <View>
-            <Text className="m-5 font-bold text-xl">Coming Soon</Text>
+            <Text className="m-5 text-xl font-bold">Coming Soon</Text>
             <FlatList
               data={upcoming}
               renderItem={({ item }) => <Card item={item} />}
@@ -250,13 +250,13 @@ export default function Page() {
           </View>
 
           {/* ALL MOVIE CARD */}
-          <View className="flex-1 mt-5 pb-24">
-            <Text className="m-5 font-bold text-xl">All Movies</Text>
+          <View className="mt-5 flex-1 pb-24">
+            <Text className="m-5 text-xl font-bold">All Movies</Text>
             <FlatList
               data={movies}
               renderItem={({ item }) => (
                 <AllMovieCard
-                  // width={"w-96"}
+                  width={""}
                   item={item}
                   title={item.title}
                   poster={item.thumbnail}

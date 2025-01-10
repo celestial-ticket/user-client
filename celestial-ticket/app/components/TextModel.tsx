@@ -14,16 +14,16 @@ type GLTFResult = GLTF & {
 
 export default function TextModel(props: JSX.IntrinsicElements["group"]) {
   const { nodes, materials } = useGLTF(
-    require("../../assets/text-model.glb")
+    require("../../assets/text-model.glb"),
   ) as GLTFResult;
 
-  console.log("nodes:", nodes);
-  console.log("materials:", materials);
+  // console.log("🚀 ~ TextModel ~ nodes:", nodes);
+  // console.log("🚀 ~ TextModel ~ materials:", materials);
 
-  if (!nodes || !materials) {
-    console.log("Failed to load GLTF model");
-    return null;
-  }
+  // if (!nodes || !materials) {
+  //   console.log("Failed to load GLTF model");
+  //   return null;
+  // }
 
   return (
     <group
