@@ -6,9 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { toRupiah } from "../../../helpers/toRupiah";
 import * as SecureStore from "expo-secure-store";
+import { GET_ORDERS_CHAIR } from "../../../mutations/order";
+import { useQuery } from "@apollo/client";
+import { formatTime } from "../../../helpers/convertTimeStamp";
+import { useAuth } from "../../../contexts/Auth";
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -19,9 +24,14 @@ export default function CheckoutScreen() {
   const parsedShow = Array.isArray(show)
     ? JSON.parse(show[0])
     : JSON.parse(show);
-  // console.log("🚀 ~ CheckoutScreen ~ parsedShow", parsedShow);
+  console.log("🚀 ~ CheckoutScreen ~ parsedShow", parsedShow);
 
-  const { time, seatList: seats, price } = parsedShow;
+  const { startTime, seatList: seats, price, _id: showTimeId } = parsedShow;
+  // console.log("🚀 ~ CheckoutScreen ~ time:", time);
+  // console.log("🚀 ~ CheckoutScreen ~ showTimeId:", showTimeId);
+
+  //get all orders
+  const { loading, error, data, refetch } = useQuery(GET_ORDERS_CHAIR);
 
   //   const memoSeats = useMemo(() => seats, [seats]);
   const [seatsData, setSeatsData] = useState([]);
@@ -63,15 +73,36 @@ export default function CheckoutScreen() {
 
     return { total, booked: bookedSeats };
   };
-
+  const { isLogin } = useAuth();
   useEffect(() => {
-    const accessToken = SecureStore.getItem("accessToken");
-    if (!accessToken) {
-      router.replace("login");
+    refetch();
+    if (!isLogin) {
+      router.dismiss();
+      router.push("login");
     }
-    const arrangedSeats = arrangeSeats(seats);
-    setSeatsData(arrangedSeats);
-  }, []);
+
+    if (data && data.getOrders) {
+      const unavailableSeats = data.getOrders
+        .filter(
+          (order) => order.showTime._id.toString() === showTimeId.toString(),
+        )
+        .map((order) => order.seats)
+        .flat();
+
+      // console.log("🚀 ~ useEffect ~ unavailableSeats:", unavailableSeats);
+
+      const updatedSeats = seats.map(([seat, status]) => {
+        if (unavailableSeats.includes(seat)) {
+          return [seat, "unavailable"];
+        }
+        return [seat, status];
+      });
+      // console.log("🚀 ~ updatedSeats ~ updatedSeats:", updatedSeats);
+
+      const arrangedSeats = arrangeSeats(updatedSeats);
+      setSeatsData(arrangedSeats);
+    }
+  }, [data]);
 
   useEffect(() => {
     const { total, booked } = calculatePriceSummary(seatsData);
@@ -85,15 +116,16 @@ export default function CheckoutScreen() {
   const toggleSeatStatus = (
     rowIndex: number,
     section: string,
-    seatIndex: number
+    seatIndex: number,
   ) => {
     const updatedSeats = [...seatsData];
     const seat = updatedSeats[rowIndex][section][seatIndex];
-    console.log("🚀 ~ CheckoutScreen ~ seat:", seat);
+    // console.log("🚀 ~ CheckoutScreen ~ seat:", seat);
     seat[1] = seat[1] === "booked" ? "available" : "booked";
     setSeatsData(updatedSeats);
     // console.log("🚀 ~ CheckoutScreen ~ seatData:", seatsData[0].middle);
     setModalVisible(true);
+    refetch();
   };
 
   const renderRow = (
@@ -102,25 +134,25 @@ export default function CheckoutScreen() {
       middle: [string, string][];
       right: [string, string][];
     },
-    rowIndex: number
+    rowIndex: number,
   ) => (
-    <View key={rowIndex} className="flex-row justify-center mb-4 gap-12">
+    <View key={rowIndex} className="mb-4 flex-row justify-center gap-12">
       {/* Left Section */}
       <View className="flex-row">
         {rowSeats.left.map(([seat, status], index) => (
           <TouchableOpacity
             key={seat}
-            className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
+            className={`m-1 flex h-10 w-10 items-center justify-center rounded ${
               status === "available"
                 ? "bg-green-500"
                 : status === "booked"
-                ? "bg-yellow-500"
-                : "bg-red-500"
+                  ? "bg-yellow-500"
+                  : "bg-red-500"
             }`}
             disabled={status === "unavailable"}
             onPress={() => toggleSeatStatus(rowIndex, "left", index)}
           >
-            <Text className="text-white font-bold">{seat}</Text>
+            <Text className="font-bold text-white">{seat}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -129,17 +161,17 @@ export default function CheckoutScreen() {
         {rowSeats.middle.map(([seat, status], index) => (
           <TouchableOpacity
             key={seat}
-            className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
+            className={`m-1 flex h-10 w-10 items-center justify-center rounded ${
               status === "available"
                 ? "bg-green-500"
                 : status === "booked"
-                ? "bg-yellow-500"
-                : "bg-red-500"
+                  ? "bg-yellow-500"
+                  : "bg-red-500"
             }`}
             disabled={status === "unavailable"}
             onPress={() => toggleSeatStatus(rowIndex, "middle", index)}
           >
-            <Text className="text-white font-bold">{seat}</Text>
+            <Text className="font-bold text-white">{seat}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -148,43 +180,56 @@ export default function CheckoutScreen() {
         {rowSeats.right.map(([seat, status], index) => (
           <TouchableOpacity
             key={seat}
-            className={`w-10 h-10 m-1 flex items-center justify-center rounded ${
+            className={`m-1 flex h-10 w-10 items-center justify-center rounded ${
               status === "available"
                 ? "bg-green-500"
                 : status === "booked"
-                ? "bg-yellow-500"
-                : "bg-red-500"
+                  ? "bg-yellow-500"
+                  : "bg-red-500"
             }`}
             disabled={status === "unavailable"}
             onPress={() => toggleSeatStatus(rowIndex, "right", index)}
           >
-            <Text className="text-white font-bold">{seat}</Text>
+            <Text className="font-bold text-white">{seat}</Text>
           </TouchableOpacity>
         ))}
       </View>
     </View>
   );
 
+  if (loading)
+    return (
+      <View className="flex h-screen items-center justify-center">
+        <ActivityIndicator size={100} />
+      </View>
+    );
+
+  if (error)
+    return (
+      <Text className="my-auto h-screen text-center">
+        Error: {error.message}
+      </Text>
+    );
   return (
-    <View className="flex-1 p-4 bg-white">
-      <Text className="text-2xl font-bold mb-4">{movie}</Text>
-      <Text className="text-lg mb-4">Show Time: {time}</Text>
+    <View className="flex-1 bg-white p-4">
+      <Text className="mb-4 text-2xl font-bold">{movie}</Text>
+      <Text className="mb-4 text-lg">Show Time: {formatTime(startTime)}</Text>
       <ScrollView horizontal>
         <View>
-          <View className="flex-row flex-wrap justify-center w-[170vw]">
+          <View className="w-[170vw] flex-row flex-wrap justify-center">
             {seatsData.map((row, index) => renderRow(row, index))}
           </View>
-          <View className="mt-4 p-2 bg-blue-500 rounded">
-            <Text className="text-white text-center">Screen</Text>
+          <View className="mt-4 rounded bg-blue-500 p-2">
+            <Text className="text-center text-white">Screen</Text>
           </View>
         </View>
       </ScrollView>
       <View className="mt-4">
         <TouchableOpacity
-          className="p-2 bg-green-600 rounded"
+          className="rounded bg-green-600 p-2"
           onPress={() => setModalVisible(true)}
         >
-          <Text className="text-white text-center">View Summary</Text>
+          <Text className="text-center text-white">View Summary</Text>
         </TouchableOpacity>
       </View>
       {/* <Modal
@@ -195,13 +240,13 @@ export default function CheckoutScreen() {
       > */}
       <Pressable
         onPress={() => setModalVisible(false)}
-        className={`w-screen bg-slate-100 p-4 rounded absolute bottom-0  ${
+        className={`absolute bottom-0 w-screen rounded bg-slate-100 p-4 ${
           modalVisible ? "visible" : "hidden"
         }`}
       >
-        <View className="flex-row justify-between w-screen">
-          <Text className="text-lg font-bold mb-2">Price Summary</Text>
-          <Text className="text-lg text-black mb-2 right-8">
+        <View className="w-screen flex-row justify-between">
+          <Text className="mb-2 text-lg font-bold">Price Summary</Text>
+          <Text className="right-8 mb-2 text-lg text-black">
             {bookedSeats.length} x {toRupiah(price)}
           </Text>
         </View>
@@ -210,7 +255,7 @@ export default function CheckoutScreen() {
         </Text>
         <Text className="mb-4">Total Price: {toRupiah(totalPrice)}</Text>
         <TouchableOpacity
-          className="p-2 bg-yellow-500 rounded mb-2"
+          className="mb-2 rounded bg-yellow-500 p-2"
           onPress={() =>
             router.push({
               pathname: "view3d",
@@ -218,11 +263,14 @@ export default function CheckoutScreen() {
             })
           }
         >
-          <Text className="text-white text-center">3D VIEW</Text>
+          <Text className="text-center text-white">3D VIEW</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="p-2 bg-blue-500 rounded"
-          onPress={() =>
+          className="rounded bg-blue-500 p-2"
+          onPress={() => {
+            // refetch();
+
+            router.dismiss();
             router.push({
               pathname: "payment",
               params: {
@@ -232,10 +280,10 @@ export default function CheckoutScreen() {
                 showTime: show,
                 cinema: JSON.stringify(cinema),
               },
-            })
-          }
+            });
+          }}
         >
-          <Text className="text-white text-center">Continue</Text>
+          <Text className="text-center text-white">Continue</Text>
         </TouchableOpacity>
       </Pressable>
       {/* </Modal> */}

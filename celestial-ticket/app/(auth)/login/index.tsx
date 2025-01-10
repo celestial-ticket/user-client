@@ -15,14 +15,10 @@ import { loginMutation } from "../../../mutations/login"; // Ensure the mutation
 import { Link, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from "../../../contexts/Auth";
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
-}
-
-async function getValueFor(key: string) {
-  let result = await SecureStore.getItemAsync(key);
-  return result;
 }
 
 export default function LoginPage() {
@@ -34,6 +30,7 @@ export default function LoginPage() {
 
   // Mutation for login
   const [login, { loading, error }] = useMutation(loginMutation);
+  const { setIsLogin, refetch } = useAuth();
 
   // Handle text changes
   const handleChange = (field: string, value: string) => {
@@ -58,11 +55,11 @@ export default function LoginPage() {
 
       // Save access token to SecureStore
       await save("accessToken", accessToken);
-      await save("user", JSON.stringify(user)); // Save user data if needed
+      refetch(); //refetch user data
 
       // Navigate to the next page after successful login
-      router.replace("/(tabs)"); // Replace with the path of the page after login
-
+      router.replace("(tabs)"); // Replace with the path of the page after login
+      setIsLogin(true); // Set the login status to true
       // Provide feedback that login was successful
       Alert.alert("Login Successful", "You have successfully logged in.");
     } catch (err) {
@@ -77,36 +74,34 @@ export default function LoginPage() {
         colors={["#1e293b", "#172a4f", "#312e81"]}
         style={{ flex: 1 }}
       >
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-        >
+        <KeyboardAvoidingView style={{ flex: 1 }}>
           <ScrollView
             contentContainerStyle={{ flexGrow: 1 }}
             keyboardShouldPersistTaps="handled"
           >
-            <SafeAreaView className="flex justify-center items-center h-full">
+            <SafeAreaView className="flex h-full items-center justify-center">
               {/* Title Section */}
               <View className="mb-10">
                 <View className="flex-row">
-                <Text className="text-6xl font-extrabold text-customGold">
-                  Cel-
-                </Text>
-                <Text className="text-6xl font-extrabold text-white">
-                  Tix
-                </Text>
+                  <Text className="text-6xl font-extrabold text-customGold">
+                    Cel-
+                  </Text>
+                  <Text className="text-6xl font-extrabold text-white">
+                    Tix
+                  </Text>
                 </View>
-                <View className="flex-row mt-2">
-                  <View className="w-4 h-4 bg-customGold rounded-full mx-1" />
-                  <View className="w-4 h-4 bg-blue-500 rounded-full mx-1" />
-                  <View className="w-4 h-4 bg-sky-400 rounded-full mx-1" />
+                <View className="mt-2 flex-row">
+                  <View className="mx-1 h-4 w-4 rounded-full bg-customGold" />
+                  <View className="mx-1 h-4 w-4 rounded-full bg-blue-500" />
+                  <View className="mx-1 h-4 w-4 rounded-full bg-sky-400" />
                 </View>
               </View>
 
               {/* Form Section */}
-              <View className="m-8 bg-blue-900 bg-opacity-50 p-6 rounded-3xl shadow-lg">
+              <View className="m-8 rounded-3xl bg-blue-900 bg-opacity-50 p-6">
                 {/* Email Input */}
                 <TextInput
-                  className="bg-gray-900 w-96 h-16 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-customGold"
+                  className="mb-3 h-16 w-96 rounded-3xl bg-gray-900 px-5 font-bold text-white focus:ring-2 focus:ring-customGold"
                   placeholder="Email"
                   placeholderTextColor={"#a1a1aa"}
                   value={formData.email}
@@ -115,7 +110,7 @@ export default function LoginPage() {
 
                 {/* Password Input */}
                 <TextInput
-                  className="bg-gray-900 w-96 h-16 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-customGold"
+                  className="mb-3 h-16 w-96 rounded-3xl bg-gray-900 px-5 font-bold text-white focus:ring-2 focus:ring-customGold"
                   placeholder="Password"
                   placeholderTextColor={"#a1a1aa"}
                   secureTextEntry={true}
@@ -125,7 +120,7 @@ export default function LoginPage() {
 
                 {/* Login Button */}
                 <TouchableOpacity
-                  className="bg-customGold w-96 h-14 rounded-3xl mb-3 flex justify-center shadow-md hover:bg-customGold transition duration-200"
+                  className="mb-3 flex h-14 w-96 justify-center rounded-3xl bg-customGold transition duration-200 hover:bg-customGold"
                   onPress={handleSubmit}
                   disabled={loading}
                 >
@@ -135,8 +130,8 @@ export default function LoginPage() {
                 </TouchableOpacity>
 
                 {/* Register Redirect */}
-                <View className="flex-row justify-center mt-4">
-                  <Text className="text-white text-base">
+                <View className="mt-4 flex-row justify-center">
+                  <Text className="text-base text-white">
                     Don't have an account?
                   </Text>
                   <TouchableOpacity
@@ -145,7 +140,7 @@ export default function LoginPage() {
                       router.push("register"); // Navigate to the register page
                     }}
                   >
-                    <Text className="text-customGold text-base font-semibold ml-1 underline">
+                    <Text className="ml-1 text-base font-semibold text-customGold underline">
                       Register
                     </Text>
                   </TouchableOpacity>
@@ -154,14 +149,14 @@ export default function LoginPage() {
 
               {/* Decorative Sketched Cinema Elements */}
               <View className="absolute bottom-10 w-full flex-row justify-center space-x-4 opacity-50">
-                <View className="h-16 w-16 bg-transparent border-2 border-customGold rounded-full flex items-center justify-center">
-                  <Text className="text-white text-lg">🎥</Text>
+                <View className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-customGold bg-transparent">
+                  <Text className="text-lg text-white">🎥</Text>
                 </View>
-                <View className="h-16 w-16 bg-transparent border-2 border-blue-500 rounded-full flex items-center justify-center">
-                  <Text className="text-white text-lg">🎬</Text>
+                <View className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-blue-500 bg-transparent">
+                  <Text className="text-lg text-white">🎬</Text>
                 </View>
-                <View className="h-16 w-16 bg-transparent border-2 border-sky-400 rounded-full flex items-center justify-center">
-                  <Text className="text-white text-lg">🍿</Text>
+                <View className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-sky-400 bg-transparent">
+                  <Text className="text-lg text-white">🍿</Text>
                 </View>
               </View>
             </SafeAreaView>

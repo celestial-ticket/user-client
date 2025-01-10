@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
@@ -24,48 +26,85 @@ import { Link } from "expo-router";
 import AllMovieCard from "../../components/MovieCard";
 
 // ! RENDER MOVIE
-import { useQuery } from "@apollo/client";
-import { GET_MOVIES } from "../../../mutations/movie";
 import Card from "../../components/CarouselMovie";
+import { useMovies } from "../../../contexts/MoviesContext";
 
-export default function Page() {
-  // ! Location
+const width = Dimensions.get("window").width;
+const itemWidth = width * 0.5;
+
+const carouselData = [
+  {
+    id: "1",
+    title: "50% Off on All Products",
+    image:
+      "https://t4.ftcdn.net/jpg/04/80/95/15/360_F_480951584_ESYWyM1jIGg2aDL5Cqakp33cRdmFFmMu.jpg",
+  },
+  {
+    id: "2",
+    title: "Buy 1 Get 1 Free",
+    image:
+      "https://americancoinop.com/sites/default/files/styles/article_main_facebook/public/images/articles/main/russo-special_offer_00372.jpg?h=5148bfd9&itok=o-VY3Qcp",
+  },
+  {
+    id: "3",
+    title: "Free Shipping Worldwide",
+    image:
+      "https://img.freepik.com/free-vector/special-bogo-offer-buy-one-get-one-free-background-business-marketing_1017-51006.jpg?w=360",
+  },
+  {
+    id: "4",
+    title: "Clearance Sale Up to 70%",
+    image:
+      "https://t4.ftcdn.net/jpg/04/80/95/15/360_F_480951584_ESYWyM1jIGg2aDL5Cqakp33cRdmFFmMu.jpg",
+  },
+];
+
+const movies = [
+  // Add your movie data here
+];
+
+export default function MyComponent() {
+  !Location;
   const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
+    null,
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [city, setCity] = useState("");
 
   useEffect(() => {
     (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        throw "Permission to access location was denied";
+      }
       const storageLocation = await SecureStorage.getItemAsync("location");
       let location;
       if (storageLocation) {
-        setLocation(JSON.parse(storageLocation));
         location = JSON.parse(storageLocation);
+        setLocation(location);
       } else {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
-          return;
-        }
+        await Location.enableNetworkProviderAsync();
 
         location = await Location.getCurrentPositionAsync({});
-
         SecureStorage.setItemAsync("location", JSON.stringify(location));
         setLocation(location);
       }
-
-      //   console.log("🚀 ~ location:", location);
+      console.log(location, "LOCATION IN HOME");
       // get city name
       const { latitude, longitude } = location.coords;
       console.log("🚀 ~ latitude:", latitude);
-      let address = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
-      if (address.length > 0) {
-        setCity(address[0].city || address[0].region || "Unknown City");
+      try {
+        let address = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
+        console.log("🚀 ~ address:", address);
+        if (address.length > 0) {
+          setCity(address[0].city || address[0].region || "Unknown City");
+        }
+      } catch (error) {
+        Alert.alert("Error", error.message);
+        console.log("🚀 ~ error:", error);
       }
     })();
   }, []);
@@ -76,57 +115,23 @@ export default function Page() {
   } else if (location) {
     text = JSON.stringify(location);
   }
-
-  // ! Carousel
-  const width = Dimensions.get("window").width;
-  const itemWidth = width * 0.5; // Width of each item
-
-  const carouselData = [
-    {
-      id: "1",
-      title: "50% Off on All Products",
-      image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
-    },
-    {
-      id: "2",
-      title: "Buy 1 Get 1 Free",
-      image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
-    },
-    {
-      id: "3",
-      title: "Free Shipping Worldwide",
-      image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
-    },
-    {
-      id: "4",
-      title: "Clearance Sale Up to 70%",
-      image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
-    },
-    {
-      id: "5",
-      title: "New Arrivals Just In",
-      image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
-    },
-  ];
-
   // ! <><><> [ RENDER MOVIE ] <><><>
-  const { loading, error, data } = useQuery(GET_MOVIES);
+  const { data, loading, error } = useMovies();
+
   const { nowShowing, upcoming, movies } = data || {};
+  console.log("🚀 ~ Page ~ upcoming:", upcoming);
   // console.log("🚀 ~ data:", nowShowing);
 
   if (loading) {
     return (
-      <Text className="w-full text-center my-auto text-3xl">Loading...</Text>
+      <View className="flex h-screen items-center justify-center">
+        <ActivityIndicator size={100} />
+      </View>
     );
   }
   if (error) {
     return (
-      <Text className="mx-auto my-auto text-3xl bg-red-600">
+      <Text className="mx-auto my-auto bg-red-600 text-3xl">
         Error: {error.message}
       </Text>
     );
@@ -134,12 +139,10 @@ export default function Page() {
 
   return (
     <SafeAreaView className="bg-white">
-      {/* SEARCH BAR */}
-      <View className="flex flex-row justify-center items-center mt-5 mb-3">
-        <View className="flex flex-row justify-center items-center w-5/6 bg-gray-100 rounded-full mr-3">
-          <View className="w-1/6 justify-center items-center">
+      <View className="mb-3 mt-5 flex flex-row items-center justify-center">
+        <View className="mr-3 flex w-5/6 flex-row items-center justify-center rounded-full bg-gray-100">
+          <View className="w-1/6 items-center justify-center">
             <Feather name="search" size={24} color="black" />
-            {/* <Image className="w-6 h-6" /> */}
           </View>
           <TextInput placeholder="Search" className="w-5/6" />
         </View>
@@ -147,108 +150,123 @@ export default function Page() {
           <FontAwesome6 name="user-circle" size={28} color="black" />
         </Link>
       </View>
-      {/* ----------------- */}
+      <View className="m-5 flex flex-row">
+        <FontAwesome
+          className="mr-3"
+          name="map-marker"
+          size={24}
+          color="grey"
+        />
+        <Text className="text-lg uppercase">{city}</Text>
+        {/* <Text>Latitude: {location?.coords.latitude}</Text> */}
+        {/* <Text>Longitude: {location?.coords.longitude}</Text> */}
+      </View>
 
-      <ScrollView className="bg-white">
-        <View>
-          {/* LOCATION */}
-          <View className="flex flex-row m-5">
-            <FontAwesome
-              className="mr-3"
-              name="map-marker"
-              size={24}
-              color="grey"
-            />
-            <Text className="text-lg uppercase">{city}</Text>
-            {/* <Text>Latitude: {location?.coords.latitude}</Text> */}
-            {/* <Text>Longitude: {location?.coords.longitude}</Text> */}
-          </View>
-
-          {/* PROMO CAROUSEL */}
-          <View className="flex flex-row">
-            <Carousel
-              loop
-              width={width}
-              height={width / 2}
-              autoPlay={true}
-              data={carouselData}
-              scrollAnimationDuration={3000}
-              // onSnapToItem={(index) => console.log("current index:", index)}
-              renderItem={({ item }) => (
-                <View>
-                  <Image
-                    source={{ uri: item.image }}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: 10,
-                    }}
-                    resizeMode="cover"
-                  />
-                </View>
-              )}
-            />
-          </View>
-          {/* ----------------- */}
-
-          {/* CARD NOW SHOWING */}
-          <View>
-            <Text className="m-5 font-bold text-xl">Now Showing</Text>
-            <FlatList
-              data={nowShowing}
-              renderItem={({ item }) => <Card item={item} />}
-              keyExtractor={(item) => item._id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
-              decelerationRate="fast" // Fast deceleration for smoother snapping
-              snapToAlignment="center" // Snap to center
-              contentContainerStyle={{
-                paddingHorizontal: (width - itemWidth) / 2, // Center the first item
-              }}
-            />
-          </View>
-
-          {/* UPCOMING */}
-          <View>
-            <Text className="m-5 font-bold text-xl">Coming Soon</Text>
-            <FlatList
-              data={upcoming}
-              renderItem={({ item }) => <Card item={item} />}
-              keyExtractor={(item) => item._id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
-              decelerationRate="fast" // Fast deceleration for smoother snapping
-              snapToAlignment="center" // Snap to center
-              contentContainerStyle={{
-                paddingHorizontal: (width - itemWidth) / 2, // Center the first item
-              }}
-            />
-          </View>
-
-          {/* ALL MOVIE CARD */}
-          <View className="flex-1 mt-5 pb-24">
-            <Text className="m-5 font-bold text-xl">All Movies</Text>
-            <FlatList
-              data={movies}
-              renderItem={({ item }) => (
-                <AllMovieCard
-                  item={item}
-                  title={item.title}
-                  poster={item.thumbnail}
-                  ageRating={item.ageRating}
-                  genre={item.genre}
+      <FlatList
+        data={[{ key: "carousel" }]}
+        renderItem={({ item }) => {
+          return (
+            <View>
+              <View className="flex flex-row">
+                <Carousel
+                  loop
+                  width={width}
+                  height={width / 2}
+                  autoPlay={true}
+                  data={carouselData}
+                  scrollAnimationDuration={3000}
+                  // onSnapToItem={(index) => console.log("current index:", index)}
+                  renderItem={({ item }) => (
+                    <View>
+                      <Image
+                        source={{ uri: item.image }}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: 10,
+                        }}
+                        resizeMode="cover"
+                      />
+                      <Text>{item.title}</Text>
+                    </View>
+                  )}
                 />
-              )}
-              keyExtractor={(item) => item._id}
-              numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between" }}
-              contentContainerStyle={{ paddingHorizontal: 10 }}
-            />
-          </View>
-        </View>
-      </ScrollView>
+              </View>
+
+              {/* CARD NOW SHOWING */}
+              <View>
+                <Text className="m-5 text-xl font-bold">Now Showing</Text>
+                <FlatList
+                  data={nowShowing}
+                  renderItem={({ item }) => <Card item={item} />}
+                  keyExtractor={(item) => item._id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
+                  decelerationRate="fast" // Fast deceleration for smoother snapping
+                  // snapToAlignment="center" // Snap to center
+                  contentContainerStyle={{
+                    paddingHorizontal: (width - itemWidth) / 2, // Center the first item
+                  }}
+                  initialScrollIndex={1} // Start the carousel at the second item (index 1)
+                  getItemLayout={(data, index) => ({
+                    length: itemWidth + 6,
+                    offset: (itemWidth + 6) * index,
+                    index,
+                  })}
+                />
+              </View>
+
+              {/* UPCOMING */}
+              <View>
+                <Text className="m-5 text-xl font-bold">Coming Soon</Text>
+                <FlatList
+                  data={upcoming}
+                  renderItem={({ item }) => <Card item={item} />}
+                  keyExtractor={(item) => item._id}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
+                  decelerationRate="fast" // Fast deceleration for smoother snapping
+                  // snapToAlignment="center" // Snap to center
+                  contentContainerStyle={{
+                    paddingHorizontal: (width - itemWidth) / 2, // Center the first item
+                  }}
+                  initialScrollIndex={1} // Start the carousel at the second item (index 1)
+                  getItemLayout={(data, index) => ({
+                    length: itemWidth + 6,
+                    offset: (itemWidth + 6) * index,
+                    index,
+                  })}
+                />
+              </View>
+
+              {/* ALL MOVIE CARD */}
+              <View className="mt-5 flex-1 pb-24">
+                <Text className="m-5 text-xl font-bold">All Movies</Text>
+                <FlatList
+                  data={movies}
+                  renderItem={({ item }) => (
+                    <AllMovieCard
+                      width={""}
+                      item={item}
+                      title={item.title}
+                      poster={item.thumbnail}
+                      ageRating={item.ageRating}
+                      genre={item.genre}
+                    />
+                  )}
+                  keyExtractor={(item) => item._id}
+                  numColumns={2}
+                  columnWrapperStyle={{ justifyContent: "space-evenly" }}
+                  contentContainerStyle={{ gap: 6, paddingHorizontal: 12 }}
+                />
+              </View>
+            </View>
+          );
+        }}
+        keyExtractor={(item) => item.key}
+      />
     </SafeAreaView>
   );
 }

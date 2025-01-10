@@ -22,9 +22,20 @@ export default function Model({
   ...props
 }: JSX.IntrinsicElements["group"] & { color: string }) {
   const { nodes, materials } = useGLTF(
-    require("../../assets/model.glb")
+    require("../../assets/model.glb"),
   ) as GLTFResult;
 
+  //the reason for erro MAYBE by this line, maybe because they add process to
+  // already heavy process
+  // console.log("🚀 ~ Model ~ nodes:", nodes);
+  // console.log("🚀 ~ Model ~ materials:", materials);
+
+  // console.log("🚀 ~ Model ~ nodes:", nodes);
+  // console.log("🚀 ~ Model ~ materials:", materials);
+
+  // if (nodes || materials) {
+  //   setIsSeat(true);
+  // }
   // console.log("nodes:", nodes);
   // console.log("materials:", materials);
 
@@ -54,7 +65,7 @@ export default function Model({
       nodes.Node4.geometry,
       nodes.Node5.geometry,
     ],
-    [nodes]
+    [nodes],
   );
 
   return (

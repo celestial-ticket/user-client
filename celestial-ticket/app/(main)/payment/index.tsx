@@ -1,14 +1,18 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, ActivityIndicator, Alert } from "react-native";
 import { useMutation } from "@apollo/client";
 import { WebView } from "react-native-webview";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CREATE_PAYMENT_TOKEN } from "../../../mutations/midtrans";
 import React from "react";
-import { toRupiah } from "../../../helpers/toRupiah";
+import { useAuth } from "../../../contexts/Auth";
 
 export default function PaymentScreen() {
+  const { refetch, isLogin } = useAuth();
   const router = useRouter();
+  if (!isLogin) {
+    router.replace("login");
+  }
   const params = useLocalSearchParams();
   const { totalPrice, bookedSeats, movie, showTime, cinema } = params;
 
@@ -47,57 +51,52 @@ export default function PaymentScreen() {
     }
   };
 
+  useEffect(() => {
+    handlePayment();
+  }, []);
+
   if (loading) {
     return (
-      <Text className="w-full text-center my-auto text-3xl">Loading...</Text>
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size={100} color="#0000ff" />
+      </View>
     );
   }
 
   if (error) {
     return (
-      <Text className="mx-auto my-auto text-3xl bg-red-600">
+      <Text className="mx-auto my-auto bg-red-600 text-3xl">
         Error: {error.message}
       </Text>
     );
   }
   return (
-    <>
-      {webViewUrl ? (
-        <WebView
-          source={{ uri: webViewUrl }}
-          style={{ marginTop: 0, width: "100%", height: "80%" }}
-          onNavigationStateChange={(event) => {
-            if (event.url.includes("success")) {
-              alert("Payment Successful");
-              console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
-              router.replace({
-                pathname: "order-detail",
-                params: {
-                  totalPrice,
-                  bookedSeats: JSON.stringify(bookedSeats),
-                  movie,
-                  showTime,
-                  cinema,
-                },
-              }); // Navigate to order-detail screen
-            } else if (event.url.includes("error")) {
-              alert("Payment Failed");
-              console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
-              router.back();
-            }
-          }}
-        />
-      ) : (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text>Movie: {movie}</Text>
-          <Text>Seats: {arrayBookedSeats.join(" ")}</Text>
-          <Text>Total: {toRupiah(+totalPrice)}</Text>
-          <Button title="Start Payment" onPress={handlePayment} />
-          <Text>No WebView URL</Text>
-        </View>
-      )}
-    </>
+    // <>
+    //   {webViewUrl ? (
+    <WebView
+      source={{ uri: webViewUrl }}
+      style={{ marginTop: 0, width: "100%", height: "80%" }}
+      onNavigationStateChange={(event) => {
+        if (event.url.includes("success")) {
+          refetch();
+          Alert.alert("Payment Successful");
+          console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
+          router.replace({
+            pathname: "order-detail",
+            params: {
+              totalPrice,
+              bookedSeats: JSON.stringify(bookedSeats),
+              movie,
+              showTime,
+              cinema,
+            },
+          }); // Navigate to order-detail screen
+        } else if (event.url.includes("error")) {
+          Alert.alert("Payment Failed");
+          console.log("🚀 ~ PaymentScreen ~ event.url", event.url);
+          router.back();
+        }
+      }}
+    />
   );
 }
