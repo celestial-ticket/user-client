@@ -2,6 +2,13 @@ import { Stack } from "expo-router/stack";
 import "../global.css";
 import { ApolloProvider } from "@apollo/client";
 import client from "../config/apollo-client";
+import { LogBox } from "react-native";
+import { suppressSpecificConsoleErrors } from "../helpers/suppressTrimError";
+
+LogBox.ignoreAllLogs(true); //error karena index.js tidak dijalankan
+
+// Suppress specific console errors
+// suppressSpecificConsoleErrors();
 
 export default function Layout() {
   return (

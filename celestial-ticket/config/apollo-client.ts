@@ -3,7 +3,7 @@ import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
 const httpLink = createHttpLink({
-  uri: "https://a8d1-182-253-48-220.ngrok-free.app/",
+  uri: "https://cel-tix-server.fauzhanwahyudi.com/",
 });
 
 const authLink = setContext((_, { headers }) => {

@@ -17,26 +17,28 @@ import { GET_USER } from "../../../mutations/user";
 import { formatTime } from "../../../helpers/convertTimeStamp";
 
 export default function ProfileScreen() {
+  // Ambil data pengguna dari SecureStore
+
+  // useEffect(() => {
+  //   const isAuthenticated = async () => {
+  //     const token = await SecureStore.getItemAsync("accessToken");
+  //     return !!token;
+  //   };
+  //   const checkAuth = async () => {
+  //     const auth = await isAuthenticated();
+  //     if (!auth) {
+  //       router.push("login");
+  //     }
+  //   };
+
+  //   checkAuth();
+  // }, []);
+
   const router = useRouter();
   // const [user, setUser] = useState(null);
 
   // get data from mutation query
   const { loading, error, data } = useQuery(GET_USER);
-
-  // Ambil data pengguna dari SecureStore
-  useEffect(() => {
-    const fetchUser = async () => {
-      const userToken = await SecureStore.getItemAsync("accessToken");
-      console.log("🚀 ~ fetchUser ~ userToken:", userToken);
-
-      if (!userToken) {
-        router.dismiss();
-        router.push("login"); // Arahkan ke halaman login jika belum login
-      }
-    };
-
-    fetchUser();
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -49,6 +51,7 @@ export default function ProfileScreen() {
       // setUser(null);
 
       // Navigasi ke halaman login
+      router.dismissAll();
       router.replace("(main)");
     } catch (error) {
       console.error("Error during logout:", error);
@@ -61,7 +64,20 @@ export default function ProfileScreen() {
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
-  if (error) return <Text>Error: {error.message}</Text>;
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <TouchableOpacity
+          className="bg-customGold w-96 h-14 rounded-3xl mb-3 flex justify-center shadow-md hover:bg-customGold transition duration-200"
+          onPress={() => router.push("login")}
+        >
+          <Text className="text-center font-bold text-blue-900">
+            Please Login First
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   const { user } = data;
 

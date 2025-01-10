@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as SecureStore from "expo-secure-store";
 import * as Location from "expo-location";
@@ -90,7 +96,11 @@ export default function CinemaScreen() {
   });
 
   if (moviesLoading || loading)
-    return <Text className="h-screen my-auto text-center">Loading...</Text>;
+    return (
+      <View className="h-screen my-auto justify-center items-center">
+        <ActivityIndicator size={"100"} color="#0000ff" />
+      </View>
+    );
 
   if (moviesError || error)
     return (
@@ -111,6 +121,9 @@ export default function CinemaScreen() {
 
   return (
     <ScrollView className="flex-1">
+      <Text className="text-3xl font-bold text-center mt-5 mb-5 under">
+        Nearby Cinema
+      </Text>
       {transformedData.map((cinema, index) => (
         <View key={index} className="border-b w-full p-3 border-gray-300">
           <TouchableOpacity onPress={() => toggleCinema(cinema._id)}>
@@ -125,23 +138,25 @@ export default function CinemaScreen() {
             </View>
           </TouchableOpacity>
           {expandedCinema === cinema._id && (
-            <View className="mt-2">
+            <View className="m-4">
               {cinema.movies.map((movie) => (
-                <AllMovieCard
-                  width={"w-full"}
-                  key={movie._id}
-                  item={movie}
-                  title={movie.title}
-                  poster={movie.thumbnail}
-                  ageRating={movie.ageRating}
-                  genre={movie.genre}
-                  onPress={() =>
-                    router.push({
-                      pathname: "detail-film",
-                      params: { item: JSON.stringify(movie) },
-                    })
-                  }
-                />
+                <View className="mb-6" key={movie._id}>
+                  <AllMovieCard
+                    width={"w-full"}
+                    key={movie._id}
+                    item={movie}
+                    title={movie.title}
+                    poster={movie.thumbnail}
+                    ageRating={movie.ageRating}
+                    genre={movie.genre}
+                    onPress={() =>
+                      router.push({
+                        pathname: "detail-film",
+                        params: { item: JSON.stringify(movie) },
+                      })
+                    }
+                  />
+                </View>
               ))}
             </View>
           )}

@@ -49,15 +49,14 @@ export default function OrderDetailScreen() {
       : JSON.parse(showTime);
   }
 
-  const accessToken = SecureStore.getItem("accessToken");
-  if (!accessToken) {
-    router.push("login");
-  }
-
   const [createOrder, { loading, error }] = useMutation(CreateOrder);
   const [sendEmail] = useMutation(SendEmail);
 
   useEffect(() => {
+    const accessToken = SecureStore.getItem("accessToken");
+    if (!accessToken) {
+      router.push("login");
+    }
     if (existingOrder) {
       try {
         const parsedExistingOrder = Array.isArray(existingOrder)

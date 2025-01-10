@@ -8,6 +8,7 @@ import {
   View,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Feather from "@expo/vector-icons/Feather";
@@ -25,8 +26,6 @@ import { Link } from "expo-router";
 import AllMovieCard from "../../components/MovieCard";
 
 // ! RENDER MOVIE
-import { useQuery } from "@apollo/client";
-import { GET_MOVIES } from "../../../mutations/movie";
 import Card from "../../components/CarouselMovie";
 import { useMovies } from "../../../contexts/MoviesContext";
 
@@ -92,31 +91,31 @@ export default function Page() {
       id: "1",
       title: "50% Off on All Products",
       image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        "https://t4.ftcdn.net/jpg/04/80/95/15/360_F_480951584_ESYWyM1jIGg2aDL5Cqakp33cRdmFFmMu.jpg",
     },
     {
       id: "2",
       title: "Buy 1 Get 1 Free",
       image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        "https://americancoinop.com/sites/default/files/styles/article_main_facebook/public/images/articles/main/russo-special_offer_00372.jpg?h=5148bfd9&itok=o-VY3Qcp",
     },
     {
       id: "3",
       title: "Free Shipping Worldwide",
       image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        "https://img.freepik.com/free-vector/special-bogo-offer-buy-one-get-one-free-background-business-marketing_1017-51006.jpg?w=360",
     },
     {
       id: "4",
       title: "Clearance Sale Up to 70%",
       image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        "https://americancoinop.com/sites/default/files/styles/article_main_facebook/public/images/articles/main/russo-special_offer_00372.jpg?h=5148bfd9&itok=o-VY3Qcp",
     },
     {
       id: "5",
       title: "New Arrivals Just In",
       image:
-        "https://t3.ftcdn.net/jpg/02/36/99/22/360_F_236992283_sNOxCVQeFLd5pdqaKGh8DRGMZy7P4XKm.jpg",
+        "https://img.freepik.com/premium-vector/buy-one-get-one-free-typography-banner-design-promotion-discount-template-coupon-icon_375539-1009.jpg?semt=ais_hybrid",
     },
   ];
 
@@ -124,11 +123,14 @@ export default function Page() {
   const { data, loading, error } = useMovies();
 
   const { nowShowing, upcoming, movies } = data || {};
+  console.log("🚀 ~ Page ~ upcoming:", upcoming);
   // console.log("🚀 ~ data:", nowShowing);
 
   if (loading) {
     return (
-      <Text className="w-full text-center my-auto text-3xl">Loading...</Text>
+      <View className="flex-1 items-center justify-center absolute">
+        <ActivityIndicator size={100} />
+      </View>
     );
   }
   if (error) {
@@ -192,6 +194,7 @@ export default function Page() {
                     }}
                     resizeMode="cover"
                   />
+                  <Text>{item.title}</Text>
                 </View>
               )}
             />
@@ -209,10 +212,16 @@ export default function Page() {
               showsHorizontalScrollIndicator={false}
               snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
               decelerationRate="fast" // Fast deceleration for smoother snapping
-              snapToAlignment="center" // Snap to center
+              // snapToAlignment="center" // Snap to center
               contentContainerStyle={{
                 paddingHorizontal: (width - itemWidth) / 2, // Center the first item
               }}
+              initialScrollIndex={1} // Start the carousel at the second item (index 1)
+              getItemLayout={(data, index) => ({
+                length: itemWidth + 6,
+                offset: (itemWidth + 6) * index,
+                index,
+              })}
             />
           </View>
 
@@ -227,10 +236,16 @@ export default function Page() {
               showsHorizontalScrollIndicator={false}
               snapToInterval={itemWidth + 6} // Width of item + margin (3 on each side)
               decelerationRate="fast" // Fast deceleration for smoother snapping
-              snapToAlignment="center" // Snap to center
+              // snapToAlignment="center" // Snap to center
               contentContainerStyle={{
                 paddingHorizontal: (width - itemWidth) / 2, // Center the first item
               }}
+              initialScrollIndex={1} // Start the carousel at the second item (index 1)
+              getItemLayout={(data, index) => ({
+                length: itemWidth + 6,
+                offset: (itemWidth + 6) * index,
+                index,
+              })}
             />
           </View>
 
@@ -241,6 +256,7 @@ export default function Page() {
               data={movies}
               renderItem={({ item }) => (
                 <AllMovieCard
+                  // width={"w-96"}
                   item={item}
                   title={item.title}
                   poster={item.thumbnail}
@@ -250,8 +266,8 @@ export default function Page() {
               )}
               keyExtractor={(item) => item._id}
               numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between" }}
-              contentContainerStyle={{ paddingHorizontal: 10 }}
+              columnWrapperStyle={{ justifyContent: "space-evenly" }}
+              contentContainerStyle={{ gap: 6, paddingHorizontal: 12 }}
             />
           </View>
         </View>
