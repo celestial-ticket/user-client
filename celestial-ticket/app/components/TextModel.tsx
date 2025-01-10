@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import React, { useRef } from "react";
+import React, { useMemo } from "react";
 import { useGLTF } from "@react-three/drei/native";
 import { GLTF } from "three-stdlib";
 
@@ -17,13 +17,12 @@ export default function TextModel(props: JSX.IntrinsicElements["group"]) {
     require("../../assets/text-model.glb"),
   ) as GLTFResult;
 
-  // console.log("🚀 ~ TextModel ~ nodes:", nodes);
-  // console.log("🚀 ~ TextModel ~ materials:", materials);
-
-  // if (!nodes || !materials) {
-  //   console.log("Failed to load GLTF model");
-  //   return null;
-  // }
+  const optimizedMaterial = useMemo(() => {
+    const mat = materials.x1.clone();
+    mat.roughness = 0.8; // Reduce reflections
+    mat.metalness = 0.5; // Simplify lighting response
+    return mat;
+  }, [materials]);
 
   return (
     <group
@@ -36,7 +35,7 @@ export default function TextModel(props: JSX.IntrinsicElements["group"]) {
         castShadow
         receiveShadow
         geometry={nodes.Node1.geometry}
-        material={materials.x1}
+        material={optimizedMaterial}
       />
     </group>
   );

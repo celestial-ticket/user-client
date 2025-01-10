@@ -17,7 +17,11 @@ interface CustomTextProps {
   color: string;
 }
 
-export default function CustomTextModel({ meshProps, text, color }) {
+export default function CustomTextModel({
+  meshProps,
+  text,
+  color,
+}: CustomTextProps) {
   const font = new FontLoader().parse(myFont as any);
 
   return (
