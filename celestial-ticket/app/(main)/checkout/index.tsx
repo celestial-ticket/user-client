@@ -13,6 +13,7 @@ import * as SecureStore from "expo-secure-store";
 import { GET_ORDERS_CHAIR } from "../../../mutations/order";
 import { useQuery } from "@apollo/client";
 import { formatTime } from "../../../helpers/convertTimeStamp";
+import { useAuth } from "../../../contexts/Auth";
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -72,10 +73,10 @@ export default function CheckoutScreen() {
 
     return { total, booked: bookedSeats };
   };
-
+  const { isLogin } = useAuth();
   useEffect(() => {
-    const accessToken = SecureStore.getItem("accessToken");
-    if (!accessToken) {
+    refetch();
+    if (!isLogin) {
       router.dismiss();
       router.push("login");
     }

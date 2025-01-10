@@ -140,7 +140,7 @@ export default function CinemaScreen() {
           {expandedCinema === cinema._id && (
             <View className="m-4">
               {cinema.movies.map((movie) => (
-                <View className="mb-6" key={movie._id}>
+                <View className="mb-6" key={movie._id + Math.random()}>
                   <AllMovieCard
                     width={"w-full"}
                     key={movie._id}

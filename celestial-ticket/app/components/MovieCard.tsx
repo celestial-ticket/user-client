@@ -29,7 +29,7 @@ export default function AllMovieCard({
   console.log(item, "item");
 
   return (
-    <View className={`rounded-lg bg-white shadow-md ${width ? "" : "w-44"}`}>
+    <View className={`rounded-lg bg-white ${width ? "" : "w-44"}`}>
       <TouchableOpacity
         onPress={() =>
           router.push({

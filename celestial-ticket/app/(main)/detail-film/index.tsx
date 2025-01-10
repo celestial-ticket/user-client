@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Image,
   Text,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
+import * as Location from "expo-location";
 import { GET_SHOWTIME } from "../../../mutations/showTimes";
 import { useQuery } from "@apollo/client";
 import { toRupiah } from "../../../helpers/toRupiah";
@@ -50,8 +51,21 @@ export default function DetailFilmScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { item } = params;
-  const location = JSON.parse(SecureStore.getItem("location"));
-  const { latitude, longitude } = location.coords;
+  let location = JSON.parse(SecureStore.getItem("location")) || null;
+  if (!location) {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        throw "Permission to access location was denied";
+      }
+
+      await Location.enableNetworkProviderAsync();
+      location = await Location.getCurrentPositionAsync({});
+      SecureStore.setItemAsync("location", JSON.stringify(location));
+    })();
+  }
+
+  const { latitude, longitude } = location?.coords;
   // Parse the item data
   const parsedItem = Array.isArray(item)
     ? JSON.parse(item[0])
@@ -60,7 +74,10 @@ export default function DetailFilmScreen() {
   console.log("🚀 ~ DetailFilmScreen ~ params:", parsedItem);
 
   const movieId = parsedItem._id;
-  setMovieId(movieId);
+  useEffect(() => {
+    setMovieId(movieId);
+  }, [movieId]);
+
   // console.log("🚀 ~ DetailFilmScreen ~ movieId:", movieId);
 
   const [selectedDate, setSelectedDate] = useState(new Date());

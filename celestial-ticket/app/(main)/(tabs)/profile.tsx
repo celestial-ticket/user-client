@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   SafeAreaView,
   ScrollView,
@@ -11,64 +12,78 @@ import {
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ticket from "../../components/Ticket";
 import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_USER } from "../../../mutations/user";
 import { formatTime } from "../../../helpers/convertTimeStamp";
+import { useAuth } from "../../../contexts/Auth";
+import client from "../../../config/apollo-client";
 
 export default function ProfileScreen() {
-  // Ambil data pengguna dari SecureStore
-
-  // useEffect(() => {
-  //   const isAuthenticated = async () => {
-  //     const token = await SecureStore.getItemAsync("accessToken");
-  //     return !!token;
-  //   };
-  //   const checkAuth = async () => {
-  //     const auth = await isAuthenticated();
-  //     if (!auth) {
-  //       router.push("login");
-  //     }
-  //   };
-
-  //   checkAuth();
-  // }, []);
-
   const router = useRouter();
-  // const [user, setUser] = useState(null);
+  const { isLogin, setIsLogin, user, loading, error } = useAuth();
+
+  // Filter out duplicate orders
+  // const uniqueOrders = useMemo(() => {
+  //   const orderMap = new Map();
+  //   user.orders.forEach((order) => {
+  //     if (!orderMap.has(order.id)) {
+  //       orderMap.set(order.id, order);
+  //     }
+  //   });
+  //   return Array.from(orderMap.values());
+  // }, [user.orders]);
 
   // get data from mutation query
-  const { loading, error, data } = useQuery(GET_USER);
 
   const handleLogout = async () => {
     try {
       // Hapus data sesi yang disimpan di SecureStore
-      await SecureStore.deleteItemAsync("user");
       await SecureStore.deleteItemAsync("location");
       await SecureStore.deleteItemAsync("accessToken");
 
-      // Reset status pengguna
-      // setUser(null);
+      setIsLogin(false);
 
-      // Navigasi ke halaman login
+      // Clear Apollo Client cache
+      await client.clearStore();
+
       router.dismissAll();
       router.replace("(main)");
+      Alert.alert("Logout Success", "You have been logged out");
     } catch (error) {
       console.error("Error during logout:", error);
     }
   };
 
+  const confirmLogout = () => {
+    Alert.alert(
+      "Confirm Logout",
+      "Are you sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          onPress: handleLogout,
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
   if (loading)
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
-  if (error) {
+  if (error || isLogin === false) {
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 items-center justify-center">
         <TouchableOpacity
-          className="bg-customGold w-96 h-14 rounded-3xl mb-3 flex justify-center shadow-md hover:bg-customGold transition duration-200"
+          className="mb-3 flex h-14 w-96 justify-center rounded-3xl bg-customGold transition duration-200 hover:bg-customGold"
           onPress={() => router.push("login")}
         >
           <Text className="text-center font-bold text-blue-900">
@@ -78,8 +93,6 @@ export default function ProfileScreen() {
       </View>
     );
   }
-
-  const { user } = data;
 
   const handleOrderPress = (order) => {
     router.push({
@@ -95,7 +108,7 @@ export default function ProfileScreen() {
       <ScrollView>
         {/* Header Profile */}
         <View className="flex items-center">
-          <Text className="text-center text-3xl font-bold mt-14">
+          <Text className="mt-14 text-center text-3xl font-bold">
             My Profile
           </Text>
           <FontAwesome6
@@ -104,7 +117,7 @@ export default function ProfileScreen() {
             color="black"
             style={{ marginTop: 7 }}
           />
-          <Text className="text-center text-lg font-bold mt-5">
+          <Text className="mt-5 text-center text-lg font-bold">
             {user.name}
           </Text>
           <Text className="text-center text-lg">{user.email}</Text>
@@ -119,79 +132,41 @@ export default function ProfileScreen() {
               key={index}
               onPress={() => handleOrderPress(order)}
             >
-              <View className="bg-blue-900 me-3 ml-3 p-5 rounded-t-md">
-                <Text className="text-[#f4c366] font-extrabold text-xl mb-3">
+              <View className="me-3 ml-3 rounded-t-md bg-blue-900 p-5">
+                <Text className="mb-3 text-xl font-extrabold text-[#f4c366]">
                   {order.movie.title}
                 </Text>
                 <View className="">
                   <Text className="text-white">Day</Text>
-                  <Text className="font-bold text-xl text-white mb-3">
+                  <Text className="mb-3 text-xl font-bold text-white">
                     {new Intl.DateTimeFormat("us")
                       .format(order.showTime.date)
                       .split("/")
                       .join("-")}
                   </Text>
                   <Text className="text-white">Cinema</Text>
-                  <Text className="text-white font-bold text-xl mb-3">
+                  <Text className="mb-3 text-xl font-bold text-white">
                     {order.cinema.name}
                   </Text>
                   <Text className="text-white">Time</Text>
-                  <Text className="text-white font-bold text-xl mb-3">
+                  <Text className="mb-3 text-xl font-bold text-white">
                     {formatTime(order.showTime.startTime)}
                   </Text>
                 </View>
               </View>
-              <View className="bg-[#f4c366] mr-3 ml-3 mb-5 p-5 rounded-b-md">
+              <View className="mb-5 ml-3 mr-3 rounded-b-md bg-[#f4c366] p-5">
                 <Text>Ticket {order.seats.join(", ")}</Text>
               </View>
             </TouchableOpacity>
-            // <Ticket
-            //   key={order.id}
-            //   title={order.movie.title}
-            //   date={order.date}
-            //   time={order.time}
-            //   cinema={order.cinema.name}
-            //   price={order.price}
-            // />
           );
         })}
-        {/* <Ticket /> */}
-
-        {/* <View className="bg-white p-4 rounded-lg shadow-md">
-          <Text className="text-xl font-bold text-center">Mile 22</Text>
-
-          <View className="flex-row justify-between mt-4">
-            <Text className="text-lg">Theater: EMPIRE XXI</Text>
-            <Text className="">
-              Tuesday, 28 Aug 2018
-            </Text>
-            <Text className="text-lg">Time: 18:45</Text>
-          </View>
-
-          <View className="mt-4">
-            <Text className="text-lg">Number of Tickets: 4 Person</Text>
-            <Text className="text-gray-600">C1, C2, C3, C4</Text>
-          </View>
-
-          <View className="mt-4">
-            <Text className="text-lg">Transaction Code:</Text>
-            <Text className="text-xl font-bold">92798</Text>
-          </View>
-
-          <View className="mt-4">
-            <Image
-              source={{ uri: "https://via.placeholder.com/100" }} // Replace with your QR code image URL
-              style={{ width: 100, height: 100 }}
-            />
-          </View>
-        </View> */}
 
         {/* Logout Button */}
         <TouchableOpacity
-          className="bg-red-600 w-96 h-12 rounded-2xl mt-5 flex justify-center items-center mx-auto mb-8"
-          onPress={handleLogout}
+          className="mx-auto mb-8 mt-5 flex h-12 w-96 items-center justify-center rounded-2xl bg-red-600"
+          onPress={confirmLogout}
         >
-          <Text className="text-center text-white font-bold">Log Out</Text>
+          <Text className="text-center font-bold text-white">Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

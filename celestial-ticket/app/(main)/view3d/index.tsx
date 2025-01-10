@@ -84,7 +84,7 @@ export default function View3D() {
     <View style={styles.container}>
       {isLoading && (
         <View className="absolute flex items-center justify-center">
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size={100} color="#0000ff" />
         </View>
       )}
       <Text style={styles.text}>3D Cinema Viewer</Text>

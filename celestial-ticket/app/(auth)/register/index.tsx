@@ -12,11 +12,24 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useMutation } from "@apollo/client";
 import { registerMutation } from "../../../mutations/registration"; // pastikan mutation sudah diimpor dengan benar
 import { useRouter } from "expo-router";
-import * as SecureStorage from "expo-secure-store";
+import * as SecureStore from "expo-secure-store";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
 
 export default function RegisterPage() {
-  const location = JSON.parse(SecureStorage.getItem("location"));
+  let location = JSON.parse(SecureStore.getItem("location"));
+  if (!location) {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        throw "Permission to access location was denied";
+      }
+
+      await Location.enableNetworkProviderAsync();
+      location = await Location.getCurrentPositionAsync({});
+      SecureStore.setItemAsync("location", JSON.stringify(location));
+    })();
+  }
   const { latitude, longitude } = location.coords;
   const [formData, setFormData] = useState({
     name: "",
@@ -54,6 +67,7 @@ export default function RegisterPage() {
       console.log(formData);
       router.replace("login");
       console.log("User registered:", data.register);
+      Alert.alert("Register Successful", "You have successfully registered.");
     } catch (err) {
       console.error("Error registering user:", err);
     }
@@ -74,7 +88,7 @@ export default function RegisterPage() {
             contentContainerStyle={{ flexGrow: 1 }}
             keyboardShouldPersistTaps="handled"
           >
-            <SafeAreaView className="flex justify-center items-center h-full">
+            <SafeAreaView className="flex h-full items-center justify-center">
               <View className="mb-10">
                 <View className="flex-row">
                   <Text className="text-6xl font-extrabold text-customGold">
@@ -84,17 +98,17 @@ export default function RegisterPage() {
                     Tix
                   </Text>
                 </View>
-                <View className="flex-row mt-2">
-                  <View className="w-4 h-4 bg-customGold rounded-full mx-1" />
-                  <View className="w-4 h-4 bg-blue-500 rounded-full mx-1" />
-                  <View className="w-4 h-4 bg-sky-400 rounded-full mx-1" />
+                <View className="mt-2 flex-row">
+                  <View className="mx-1 h-4 w-4 rounded-full bg-customGold" />
+                  <View className="mx-1 h-4 w-4 rounded-full bg-blue-500" />
+                  <View className="mx-1 h-4 w-4 rounded-full bg-sky-400" />
                 </View>
               </View>
 
-              <View className="m-8 bg-blue-900 bg-opacity-50 p-6 rounded-3xl shadow-lg w-11/12 max-w-lg">
+              <View className="m-8 w-11/12 max-w-lg rounded-3xl bg-blue-900 bg-opacity-50 p-6">
                 {/* NAME */}
                 <TextInput
-                  className="bg-gray-900 w-full h-14 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-customGold"
+                  className="mb-3 h-14 w-full rounded-3xl bg-gray-900 px-5 font-bold text-white focus:ring-2 focus:ring-customGold"
                   placeholder="Name"
                   placeholderTextColor="grey"
                   value={formData.name}
@@ -102,7 +116,7 @@ export default function RegisterPage() {
                 />
                 {/* PHONE NUMBER */}
                 <TextInput
-                  className="bg-gray-900 w-full h-14 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-customGold"
+                  className="mb-3 h-14 w-full rounded-3xl bg-gray-900 px-5 font-bold text-white focus:ring-2 focus:ring-customGold"
                   placeholder="Phone Number"
                   placeholderTextColor="grey"
                   value={formData.phoneNumber}
@@ -110,7 +124,7 @@ export default function RegisterPage() {
                 />
                 {/* EMAIL */}
                 <TextInput
-                  className="bg-gray-900 w-full h-14 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-customGold"
+                  className="mb-3 h-14 w-full rounded-3xl bg-gray-900 px-5 font-bold text-white focus:ring-2 focus:ring-customGold"
                   placeholder="Email"
                   placeholderTextColor="grey"
                   value={formData.email}
@@ -118,7 +132,7 @@ export default function RegisterPage() {
                 />
                 {/* PASSWORD */}
                 <TextInput
-                  className="bg-gray-900 w-full h-14 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-customGold"
+                  className="mb-3 h-14 w-full rounded-3xl bg-gray-900 px-5 font-bold text-white focus:ring-2 focus:ring-customGold"
                   placeholder="Password"
                   placeholderTextColor="grey"
                   secureTextEntry={true}
@@ -127,7 +141,7 @@ export default function RegisterPage() {
                 />
                 {/* GENDER */}
                 <TextInput
-                  className="bg-gray-900 w-full h-14 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-customGold"
+                  className="mb-3 h-14 w-full rounded-3xl bg-gray-900 px-5 font-bold text-white focus:ring-2 focus:ring-customGold"
                   placeholder="Gender"
                   placeholderTextColor="grey"
                   value={formData.gender}
@@ -135,7 +149,7 @@ export default function RegisterPage() {
                 />
                 {/* ADDRESS */}
                 <TextInput
-                  className="bg-gray-900 w-full h-14 px-5 rounded-3xl mb-3 font-bold text-white shadow-md focus:ring-2 focus:ring-customGold"
+                  className="mb-3 h-14 w-full rounded-3xl bg-gray-900 px-5 font-bold text-white focus:ring-2 focus:ring-customGold"
                   placeholder="Address"
                   placeholderTextColor="grey"
                   value={formData.address}
@@ -143,7 +157,7 @@ export default function RegisterPage() {
                 />
                 {/* REGISTER BUTTON */}
                 <TouchableOpacity
-                  className="bg-customGold w-full h-14 rounded-3xl mb-3 flex justify-center shadow-md hover:bg-customGold transition duration-200"
+                  className="mb-3 flex h-14 w-full justify-center rounded-3xl bg-customGold transition duration-200 hover:bg-customGold"
                   onPress={handleSubmit}
                   disabled={loading}
                 >
@@ -152,8 +166,8 @@ export default function RegisterPage() {
                   </Text>
                 </TouchableOpacity>
                 {/* Login Redirect */}
-                <View className="flex-row justify-center mt-4">
-                  <Text className="text-white text-base">
+                <View className="mt-4 flex-row justify-center">
+                  <Text className="text-base text-white">
                     Already have an account?
                   </Text>
                   <TouchableOpacity
@@ -162,14 +176,14 @@ export default function RegisterPage() {
                       router.push("login"); // Navigate to the login page
                     }}
                   >
-                    <Text className="text-customGold t-base font-semibold ml-1">
+                    <Text className="t-base ml-1 font-semibold text-customGold">
                       Login
                     </Text>
                   </TouchableOpacity>
                 </View>
                 ;{/* ERROR HANDLING */}
                 {error && (
-                  <Text className="text-center text-red-500 font-bold mt-2">
+                  <Text className="mt-2 text-center font-bold text-red-500">
                     {error.message}
                   </Text>
                 )}
@@ -177,14 +191,14 @@ export default function RegisterPage() {
 
               {/* Decorative Sketched Cinema Elements */}
               <View className="absolute bottom-10 w-full flex-row justify-center space-x-4 opacity-50">
-                <View className="h-16 w-16 bg-transparent border-2 border-customGold rounded-full flex items-center justify-center">
-                  <Text className="text-white text-lg">🎥</Text>
+                <View className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-customGold bg-transparent">
+                  <Text className="text-lg text-white">🎥</Text>
                 </View>
-                <View className="h-16 w-16 bg-transparent border-2 border-blue-500 rounded-full flex items-center justify-center">
-                  <Text className="text-white text-lg">🎬</Text>
+                <View className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-blue-500 bg-transparent">
+                  <Text className="text-lg text-white">🎬</Text>
                 </View>
-                <View className="h-16 w-16 bg-transparent border-2 border-sky-400 rounded-full flex items-center justify-center">
-                  <Text className="text-white text-lg">🍿</Text>
+                <View className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-sky-400 bg-transparent">
+                  <Text className="text-lg text-white">🍿</Text>
                 </View>
               </View>
             </SafeAreaView>

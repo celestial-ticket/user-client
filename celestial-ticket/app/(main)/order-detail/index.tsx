@@ -9,12 +9,13 @@ import { formatIndoDate, formatTime } from "../../../helpers/convertTimeStamp";
 import { toRupiah } from "../../../helpers/toRupiah";
 import QRCode from "react-native-qrcode-svg";
 import { SendEmail } from "../../../mutations/sendEmail";
+import { useAuth } from "../../../contexts/Auth";
 
 export default function OrderDetailScreen() {
   const router = useRouter();
   const { movieId } = useMovie();
-  const [order, setOrder] = useState({});
-  // console.log("🚀 ~ movieId:", movieId);
+  const [order, setOrder] = useState<any>({});
+  const { refetch, isLogin, user } = useAuth();
 
   const params = useLocalSearchParams();
   const { bookedSeats, totalPrice, movie, showTime, cinema, existingOrder } =
@@ -33,7 +34,7 @@ export default function OrderDetailScreen() {
         : parsedBookedSeats;
   }
 
-  let cinemaObejct = {};
+  let cinemaObejct: { _id: string; name: string } = { _id: "", name: "" };
   if (cinema) {
     const parsedCinema = Array.isArray(cinema)
       ? JSON.parse(cinema[0])
@@ -42,7 +43,9 @@ export default function OrderDetailScreen() {
     cinemaObejct = JSON.parse(parsedCinema);
   }
 
-  let parsedShowTime = {};
+  let parsedShowTime: { _id: string; date?: number; startTime?: string } = {
+    _id: "",
+  };
   if (showTime) {
     parsedShowTime = Array.isArray(showTime)
       ? JSON.parse(showTime[0])
@@ -53,8 +56,7 @@ export default function OrderDetailScreen() {
   const [sendEmail] = useMutation(SendEmail);
 
   useEffect(() => {
-    const accessToken = SecureStore.getItem("accessToken");
-    if (!accessToken) {
+    if (!isLogin) {
       router.push("login");
     }
     if (existingOrder) {
@@ -64,7 +66,7 @@ export default function OrderDetailScreen() {
           : JSON.parse(existingOrder);
         console.log(
           "🚀 ~ OrderDetailScreen ~ parsedExistingOrder:",
-          parsedExistingOrder
+          parsedExistingOrder,
         );
         setOrder(parsedExistingOrder);
       } catch (error) {
@@ -99,13 +101,12 @@ export default function OrderDetailScreen() {
           setOrder(data.createOrder);
 
           // Call the mutation to send the email
-          // console.log(JSON.parse(await SecureStore.getItemAsync("user")).email);
           const sendData = {
-            email: JSON.parse(await SecureStore.getItemAsync("user")).email, // Replace with the user's email
+            email: user.email, // Replace with the user's email
             order: {
               movie,
-              date: formatIndoDate(parsedShowTime.date),
-              time: formatTime(parsedShowTime.date),
+              date: formatIndoDate(Number(parsedShowTime.date)),
+              time: formatTime(Number(parsedShowTime.date)),
               cinema: cinemaObejct.name,
               seats: arrayBookedSeats,
               totalPrice: toRupiah(+totalPrice),
@@ -116,7 +117,7 @@ export default function OrderDetailScreen() {
 
           await sendEmail({
             variables: {
-              email: JSON.parse(await SecureStore.getItemAsync("user")).email, // Replace with the user's email
+              email: user.email, // Replace with the user's email
               order: {
                 movie,
                 date: formatIndoDate(parsedShowTime.date),
@@ -137,43 +138,34 @@ export default function OrderDetailScreen() {
   }, []);
 
   console.log("🚀 ~ OrderDetailScreen ~ order:", order);
-  // (NOBRIDGE) LOG  🚀 ~ OrderDetailScreen ~ order:
-  // {"__typename": "Order",
-  // "_id": "677ec1117cebfe70c1f2d3bb",
-  // "cinema": {"__typename": "Cinema", "name": "Cinema 21 Plaza Senayan"},
-  // "movie": {"__typename": "Movie", "title": "Moana 2: The Return of the Ocean"},
-  // "price": 120000,
-  // "seats": ["C3", "C4", "C5"],
-  // "showTime": {"__typename": "ShowTime", "date": "1736467200000", "endTime": "1736510400000",
-  // "startTime": "1736503200000"}}
   return (
     <View>
       {!order ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <View>
-          <View className="bg-blue-900 p-4 rounded-lg shadow-md w-11/12 mx-auto mt-10">
-            <Text className="text-white text-2xl font-bold text-center">
+          <View className="mx-auto mt-10 w-11/12 rounded-lg bg-blue-900 p-4">
+            <Text className="text-center text-2xl font-bold text-white">
               {existingOrder ? order?.movie?.title : movie}
             </Text>
-            <Text className="text-white text-center">
+            <Text className="text-center text-white">
               {existingOrder
-                ? formatIndoDate(order?.showTime?.date)
-                : formatIndoDate(parsedShowTime?.date)}
+                ? formatIndoDate(Number(order?.showTime?.date))
+                : formatIndoDate(Number(parsedShowTime?.date))}
             </Text>
-            <Text className="text-white text-center">
+            <Text className="text-center text-white">
               Theater:{" "}
               {existingOrder ? order?.cinema?.name : cinemaObejct?.name}
             </Text>
-            <Text className="text-white text-center">
+            <Text className="text-center text-white">
               Time:{" "}
               {existingOrder
-                ? formatTime(order?.showTime?.startTime)
-                : formatTime(parsedShowTime?.startTime)}
+                ? formatTime(Number(order?.showTime?.startTime))
+                : formatTime(Number(parsedShowTime?.startTime))}
             </Text>
 
-            <View className="bg-white mt-4 p-4 rounded-lg">
-              <Text className="text-lg font-semibold mt-2">
+            <View className="mt-4 rounded-lg bg-white p-4">
+              <Text className="mt-2 text-lg font-semibold">
                 Transaction Code
               </Text>
               <Text className="text-lg">{order?._id}</Text>
@@ -207,10 +199,13 @@ export default function OrderDetailScreen() {
             </View>
           </View>
           <TouchableOpacity
-            onPress={() => router.push("profile")}
-            className="bg-blue-700 p-3 rounded-lg mt-4 w-11/12 mx-auto"
+            onPress={() => {
+              refetch();
+              router.push("profile");
+            }}
+            className="mx-auto mt-4 w-11/12 rounded-lg bg-blue-700 p-3"
           >
-            <Text className="text-white text-center text-lg font-semibold">
+            <Text className="text-center text-lg font-semibold text-white">
               Profile
             </Text>
           </TouchableOpacity>
