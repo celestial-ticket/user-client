@@ -16,7 +16,8 @@ export const AuthProvider = ({ children }) => {
     return {};
   }, [data]);
 
-  const [isLogin, setIsLogin] = useState(false);
+  const accessToken = SecureStore.getItem("accessToken");
+  const [isLogin, setIsLogin] = useState(accessToken ? true : false);
 
   return (
     <AuthContext.Provider

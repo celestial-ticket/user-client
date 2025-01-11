@@ -1,5 +1,13 @@
-import { useLocalSearchParams } from "expo-router";
-import { View, StyleSheet, Text, Modal, ActivityIndicator } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Modal,
+  ActivityIndicator,
+  Alert,
+  LogBox,
+} from "react-native";
 import { Suspense, useState, useEffect } from "react";
 import { Canvas, extend } from "@react-three/fiber";
 import useControls from "r3f-native-orbitcontrols";
@@ -26,18 +34,26 @@ const createRowPositions = (rows: number, columns: number, xOffset: number) => {
 };
 
 export default function View3D() {
+  const router = useRouter();
   const params = useLocalSearchParams();
-  const { seats } = params;
+  const { seats, delay: choosenDelay } = params;
   console.log("🚀 ~ View3D ~ seats:", seats);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [delay, setDelay] = useState(+choosenDelay); // Default delay of 3 seconds
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (delay === 0) {
+      // const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
+      // }, delay);
+    } else {
+      setTimeout(() => {
+        setDelay((prev) => prev - 1000);
+      }, 1000);
+    }
+    // return () => clearTimeout(timer);
+  }, [delay]);
 
   const parsedSeats = Array.isArray(seats)
     ? JSON.parse(seats[0])
@@ -75,7 +91,23 @@ export default function View3D() {
     { columns: 8, xOffset: 5 },
     { columns: 2, xOffset: 19 },
   ];
+
   const [OrbitControls, events] = useControls();
+
+  const handleError = (error) => {
+    // if (error.message.includes("trim")) {
+    Alert.alert(
+      "Error",
+      "An error occurred while loading the model. You will be redirected to the previous screen. Please different load time.",
+      [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ],
+    );
+    // }
+  };
 
   const allPositions = sections.flatMap((section) =>
     createRowPositions(rows, section.columns, section.xOffset),
@@ -85,6 +117,9 @@ export default function View3D() {
       {isLoading && (
         <View className="absolute flex items-center justify-center">
           <ActivityIndicator size={100} color="#0000ff" />
+          <Text className="mt-4 text-center text-2xl">
+            Please wait in {delay / 1000}
+          </Text>
         </View>
       )}
       <Text style={styles.text}>3D Cinema Viewer</Text>
@@ -97,15 +132,9 @@ export default function View3D() {
             far: 50, // Far clipping plane
           }}
           shadows
+          onError={handleError}
         >
-          {/* <Sky sunPosition={[100, 20, 100]} /> */}
           <ambientLight intensity={0.5} />
-          {/* <directionalLight color="red" intensity={2} position={[0, 10, 5]} /> */}
-          {/* <directionalLight
-            color="white"
-            intensity={0.8}
-            position={[2, 0, -4]}
-          /> */}
           <directionalLight position={[0, 10, 5]} intensity={1} />
           <OrbitControls />
           {!isLoading && (

@@ -80,7 +80,7 @@ export default function DetailFilmScreen() {
 
   // console.log("🚀 ~ DetailFilmScreen ~ movieId:", movieId);
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date("2025-01-10"));
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedCinemas, setSelectedCinemas] = useState(null);
 
@@ -88,7 +88,7 @@ export default function DetailFilmScreen() {
   const { loading, error, data } = useQuery(GET_SHOWTIME, {
     variables: {
       movieId,
-      date: selectedDate || "2025-01-10",
+      date: selectedDate,
       userLocation: {
         coordinates: [longitude, latitude],
         type: "Point",

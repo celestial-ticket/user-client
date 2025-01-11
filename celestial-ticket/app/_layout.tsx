@@ -5,7 +5,7 @@ import client from "../config/apollo-client";
 import { LogBox } from "react-native";
 import { AuthProvider } from "../contexts/Auth";
 
-// LogBox.ignoreAllLogs(true); //error karena index.js tidak dijalankan
+LogBox.ignoreAllLogs(true); //error karena index.js tidak dijalankan
 
 // Suppress specific console errors
 // suppressSpecificConsoleErrors();

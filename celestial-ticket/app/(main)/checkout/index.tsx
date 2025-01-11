@@ -7,6 +7,7 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { toRupiah } from "../../../helpers/toRupiah";
 import * as SecureStore from "expo-secure-store";
@@ -256,12 +257,57 @@ export default function CheckoutScreen() {
         <Text className="mb-4">Total Price: {toRupiah(totalPrice)}</Text>
         <TouchableOpacity
           className="mb-2 rounded bg-yellow-500 p-2"
-          onPress={() =>
-            router.push({
-              pathname: "view3d",
-              params: { seats: JSON.stringify(seatsData) },
-            })
-          }
+          onPress={() => {
+            let delay = 0;
+            Alert.alert(
+              "3D VIEW MODE",
+              "Choose performance according to your phone performance",
+              [
+                {
+                  text: "Low",
+                  onPress: () => {
+                    delay = 25;
+                    router.push({
+                      pathname: "view3d",
+                      params: {
+                        seats: JSON.stringify(seatsData),
+                        delay: delay * 1000,
+                      },
+                    });
+                  },
+                },
+                {
+                  text: "Mid",
+                  onPress: () => {
+                    delay = 15;
+                    router.push({
+                      pathname: "view3d",
+                      params: {
+                        seats: JSON.stringify(seatsData),
+                        delay: delay * 1000,
+                      },
+                    });
+                  },
+                },
+                {
+                  text: "Flagship",
+                  onPress: () => {
+                    delay = 5;
+                    router.push({
+                      pathname: "view3d",
+                      params: {
+                        seats: JSON.stringify(seatsData),
+                        delay: delay * 1000,
+                      },
+                    });
+                  },
+                },
+              ],
+              {
+                cancelable: true,
+              },
+            );
+          }}
         >
           <Text className="text-center text-white">3D VIEW</Text>
         </TouchableOpacity>
